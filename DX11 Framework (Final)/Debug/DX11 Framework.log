@@ -1,0 +1,13 @@
+﻿  Application.cpp
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(672,25): warning C4101: 'cursorPosNew': unreferenced local variable
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(771): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(772): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(773): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(774): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(771,50): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(772,62): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(773,55): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(774,67): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(818,10): warning C4189: 'offset': local variable is initialized but not referenced
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(817,10): warning C4189: 'stride': local variable is initialized but not referenced
+  DX11 Framework.vcxproj -> C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Debug\DX11 Framework.exe
