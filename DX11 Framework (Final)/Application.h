@@ -10,6 +10,7 @@
 //#include "Structures.h"
 #include "OBJLoader.h"
 #include "Camera.h"
+#include "GameObject.h"
 
 using namespace DirectX;
 
@@ -68,6 +69,8 @@ private:
 	int planeIndexNum = 96;
 	float timeFromUpdateFunction;
 
+	int cameraDetectDelay = 0;
+
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 	HRESULT InitDevice();
@@ -80,6 +83,8 @@ private:
 	UINT _WindowHeight;
 	UINT _WindowWidth;
 
+	GameObject* gameObject;
+
 	Camera* _camera;
 	Camera* _camera2;
 	float _cameraOrbitRadius = 7.0f;
@@ -88,8 +93,8 @@ private:
 	float _cameraOrbitAngleXZ = -90.0f;
 	float _cameraSpeed = 2.0f;
 
-	UINT _renderHeight = 720;
-	UINT _renderWidth = 1280;
+	UINT _renderHeight = 1080;
+	UINT _renderWidth = 1920;
 
 public:
 	Application();

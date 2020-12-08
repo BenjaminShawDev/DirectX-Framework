@@ -48,6 +48,7 @@ Application::Application()
     _camera = nullptr;
     _camera2 = nullptr;
     _transparency = nullptr;
+    gameObject = nullptr;
 }
 
 Application::~Application()
@@ -74,7 +75,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
         return E_FAIL;
     }
 
-    //ShowCursor(false);
+    ShowCursor(false);
 
 	// Initialize the world matrix
 	XMStoreFloat4x4(&_world, XMMatrixIdentity());
@@ -112,7 +113,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
     _camera = new Camera(eye, at, up, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, true);
 
-    XMFLOAT3 eye2 = XMFLOAT3(20.0f, 0.0f, 0.0f);
+    XMFLOAT3 eye2 = XMFLOAT3(20.0f, 1.0f, 0.0f);
     XMFLOAT3 at2 = XMFLOAT3(0.0f, 1.0f, 00.0f);
     XMFLOAT3 up2 = XMFLOAT3(0.0f, 1.0f, 00.0f);
 
@@ -122,10 +123,29 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 	//XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XM_PIDIV2, _WindowWidth / (FLOAT) _WindowHeight, 0.01f, 100.0f));
 
     floorMeshData = OBJLoader::Load("Assets/Plane.obj", _pd3dDevice, false);
-    CreateDDSTextureFromFile(_pd3dDevice, L"Assets/Brick.dds", nullptr, &floorTextureData);
-
     objMeshData2 = OBJLoader::Load("Assets/Cube.obj", _pd3dDevice, false);
+
+    CreateDDSTextureFromFile(_pd3dDevice, L"Assets/Brick.dds", nullptr, &floorTextureData);
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/PineTree.dds", nullptr, &objTextureData2);
+
+    Geometry floorGeometry;
+    floorGeometry.indexBuffer = floorMeshData.IndexBuffer;
+    floorGeometry.vertexBuffer = floorMeshData.VertexBuffer;
+    floorGeometry.numberOfIndices = floorMeshData.IndexCount;
+    floorGeometry.vertexBufferOffset = floorMeshData.VBOffset;
+    floorGeometry.vertexBufferStride = floorMeshData.VBStride;
+
+    Material shinyMaterial;
+    shinyMaterial.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+    shinyMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    shinyMaterial.specular = XMFLOAT4(0.5f, 0.5f, 0.5, 1.0f);
+    shinyMaterial.specularPower = 10.0f;
+
+    gameObject = new GameObject("Floor", floorGeometry, shinyMaterial);
+    gameObject->SetPosition(0.0f, 0.0f, 0.0f);
+    gameObject->SetScale(0.0f, 0.0f, 0.0f);
+    gameObject->SetRotation(0.0f, 0.0f, 0.0f);
+    gameObject->SetTextureRV(floorTextureData);
 
     //Create the sample state
     D3D11_SAMPLER_DESC sampDesc;
@@ -669,10 +689,17 @@ void Application::Update()
     // Update our time
     static float t = 0.0f;
 
+    cameraDetectDelay++;
+
     POINT cursorPosOld, cursorPosNew;
     cursorPosOld.x = _WindowWidth / 2;
     cursorPosOld.y = _WindowHeight / 2;
-    SetCursorPos(cursorPosOld.x, cursorPosOld.y);
+
+    if (cameraDetectDelay == 3)
+    {
+        SetCursorPos(cursorPosOld.x, cursorPosOld.y);
+        cameraDetectDelay = 0;
+    }
 
     if (_driverType == D3D_DRIVER_TYPE_REFERENCE)
     {
@@ -721,15 +748,49 @@ void Application::Update()
             cameraPos.x += 0.1f;
         }
 
-        //GetCursorPos(&cursorPosNew);
-        //if (cursorPosOld.y < cursorPosNew.y)
-        //    atPos.x -= 1.0f;
-        //if (cursorPosOld.x > cursorPosNew.x)
-        //    atPos.x -= 1.0f;
-        //if (cursorPosOld.x < cursorPosNew.x)
-        //    atPos.x += 1.0f;
-        //if (cursorPosOld.y > cursorPosNew.y)
-        //    atPos.y += 1.0f;
+        POINT mouseDirection;
+        mouseDirection.x = mouseDirection.y = 0;
+
+        GetCursorPos(&cursorPosNew);
+        if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x == cursorPosNew.x) //Detect looking down
+            atPos.y -= 0.1f;
+        if (cursorPosOld.x > cursorPosNew.x && cursorPosOld.y == cursorPosNew.y) //Right
+            atPos.x -= 0.1f;
+        if (cursorPosOld.x < cursorPosNew.x && cursorPosOld.y == cursorPosNew.y) //Left
+            atPos.x += 0.1f;
+        if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x == cursorPosNew.x) //Up
+            atPos.y += 0.1f;
+        if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x < cursorPosNew.x) //Up left
+        {
+            atPos.x += 0.07f;
+            atPos.y += 0.07f;
+        }
+        if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x > cursorPosNew.x) //Up right
+        {
+            atPos.x -= 0.07f;
+            atPos.y += 0.07f;
+        }
+        if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x < cursorPosNew.x) //Down left
+        {
+            atPos.x += 0.07f;
+            atPos.y -= 0.07f;
+        }
+        if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x > cursorPosNew.x) //Down right
+        {
+            atPos.x -= 0.07f;
+            atPos.y -= 0.07f;
+        }
+        
+        //float distanceBetweenPosAndAt = sqrt(pow((atPos.x + cameraPos.x), 2) + pow((atPos.y + cameraPos.y), 2) + pow((atPos.z - cameraPos.z), 2));
+
+        //if (distanceBetweenPosAndAt > 30)
+        //{
+        //    atPos.z -= 0.1f;
+        //}
+        //if (distanceBetweenPosAndAt < 30)
+        //{
+        //    atPos.z += 0.1f;
+        //}
 
         _camera->SetPosition(cameraPos);
         _camera->SetLookAt(atPos);
@@ -743,9 +804,6 @@ void Application::Update()
         _camera2->Update();
     }
 
-    //
-    // Animate the cube
-    //
     //XMStoreFloat4x4(&_world, XMMatrixRotationY(t));
     //XMStoreFloat4x4(&_world, XMMatrixTranslation(0.0f, 0.0f, 0.0f));
     XMStoreFloat4x4(&_world2, XMMatrixTranslation(0.0f, 3.0f, 0.0f));
@@ -777,6 +835,7 @@ void Application::Draw()
     //
     ConstantBuffer cb;
 	cb.mWorld = XMMatrixTranspose(world);
+    //cb.mWorld = XMMatrixTranspose(gameobject->GetWorldMatrix())
     if (selectedCameraNum == 1)
     {
         cb.mView = XMMatrixTranspose(view2);
@@ -796,13 +855,10 @@ void Application::Draw()
     cb.SpecularMtrl = specularMaterial;
     cb.SpecularLight = specularLight;
     cb.SpecularPower = specularPower;
-    cb.EyePosW = eyePosW;
+    //cb.EyePosW = eyePosW;
+    cb.EyePosW = _camera->GetPosition();
 
 	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
-
-    //
-    // Renders a triangle
-    //
 
     if (GetAsyncKeyState(VK_LEFT))
     {
@@ -814,19 +870,18 @@ void Application::Draw()
         _pImmediateContext->RSSetState(_wireFrame);
     }
 
-    UINT stride = sizeof(SimpleVertex);
-    UINT offset = 0;
-
 	_pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
 	_pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
     _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
     _pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
 
-    _pImmediateContext->PSSetShaderResources(0, 1, &floorTextureData);
+    ID3D11ShaderResourceView* textureRV = gameObject->GetTextureRV();
+    _pImmediateContext->PSSetShaderResources(0, 1, &textureRV);
+    //_pImmediateContext->PSSetShaderResources(0, 1, &floorTextureData);
     _pImmediateContext->PSSetSamplers(0, 1, &_pSamplerLinear);
 
-    _pImmediateContext->IASetVertexBuffers(0, 1, &floorMeshData.VertexBuffer, &floorMeshData.VBStride, &floorMeshData.VBOffset);
-    _pImmediateContext->IASetIndexBuffer(floorMeshData.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+    //_pImmediateContext->IASetVertexBuffers(0, 1, &floorMeshData.VertexBuffer, &floorMeshData.VBStride, &floorMeshData.VBOffset);
+    //_pImmediateContext->IASetIndexBuffer(floorMeshData.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
     //"Fine-tune" the blending equation
     float blendFactor[] = { 0.75f, 0.75f, 0.75f, 1.0f };
@@ -834,11 +889,12 @@ void Application::Draw()
     _pImmediateContext->OMSetBlendState(0, 0, 0xffffffff);
 
     //Render opaque objects
-    
+    gameObject->Draw(_pImmediateContext);
 
     //Set the blend state for transparent objects
     _pImmediateContext->OMSetBlendState(_transparency, blendFactor, 0xffffffff);
-    _pImmediateContext->DrawIndexed(floorMeshData.IndexCount, 0, 0);
+    //_pImmediateContext->DrawIndexed(floorMeshData.IndexCount, 0, 0);
+    //gameobject->Draw(_pImmediateContext);
 
     world = XMLoadFloat4x4(&_world2);
     cb.mWorld = XMMatrixTranspose(world);
