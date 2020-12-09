@@ -49,6 +49,13 @@ private:
 	ID3D11ShaderResourceView* _pTextureRV;
 	ID3D11SamplerState*		_pSamplerLinear;
 
+	Geometry				cubeGeometry;
+	Geometry				floorGeometry;
+	Geometry				aeroplaneGeometry;
+
+	Material				shinyMaterial;
+	Material				noSpecMaterial;
+
 	XMFLOAT3				lightDirection;
 	XMFLOAT4				diffuseMaterial;
 	XMFLOAT4				diffuseLight;
@@ -67,13 +74,9 @@ private:
 	ID3D11ShaderResourceView* aeroplaneTextureData = nullptr;
 
 	int selectedCameraNum = 0;
-
-	int cubeIndexNum = 36;
-	int pyramidIndexNum = 18;
-	int planeIndexNum = 96;
-	float timeFromUpdateFunction;
-
 	int cameraDetectDelay = 0;
+	int objectCreateNumber = 1;
+	float objectScaleNumber = 1;
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
@@ -81,8 +84,8 @@ private:
 	void Cleanup();
 	HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 	HRESULT InitShadersAndInputLayout();
-	HRESULT InitVertexBuffer();
-	HRESULT InitIndexBuffer();
+
+	void CreateObject(int objectNum);
 
 	UINT _WindowHeight;
 	UINT _WindowWidth;

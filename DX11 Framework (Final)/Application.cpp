@@ -48,7 +48,7 @@ Application::Application()
     _camera = nullptr;
     _camera2 = nullptr;
     _transparency = nullptr;
-    //gameObject = nullptr;
+    gameObject = nullptr;
 }
 
 Application::~Application()
@@ -99,12 +99,6 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     //Eye pos
     eyePosW = XMFLOAT3(0.0f, 0.0f, -5.0f);
 
-    //Initialize the view matrix
-    //XMVECTOR Eye = XMVectorSet(0.0f, 10.0f, -20.0f, 0.0f); //Originally 0 0 -3 0
-    //XMVECTOR At = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-    //XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-    //XMStoreFloat4x4(&_view, XMMatrixLookAtLH(Eye, At, Up));
-
     selectedCameraNum = 0;
 
     XMFLOAT3 eye = XMFLOAT3(0.0f, 2.0f, -20.0f);
@@ -125,39 +119,41 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     floorMeshData = OBJLoader::Load("Assets/Plane.obj", _pd3dDevice, false);
     cubeMeshData = OBJLoader::Load("Assets/Cube.obj", _pd3dDevice, false);
     aeroplaneMeshData = OBJLoader::Load("Assets/Hercules.obj", _pd3dDevice, false);
+    //aeroplaneMeshData = OBJLoader::Load("Assets/Cylinder.obj", _pd3dDevice, false);
 
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/Brick.dds", nullptr, &floorTextureData);
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/PineTree.dds", nullptr, &cubeTextureData);
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/HERCULES_COLOR.dds", nullptr, &aeroplaneTextureData);
+    //CreateDDSTextureFromFile(_pd3dDevice, L"Assets/Cylinder2.dds", nullptr, &aeroplaneTextureData);
 
-    Geometry floorGeometry;
+    //Geometry floorGeometry;
     floorGeometry.indexBuffer = floorMeshData.IndexBuffer;
     floorGeometry.vertexBuffer = floorMeshData.VertexBuffer;
     floorGeometry.numberOfIndices = floorMeshData.IndexCount;
     floorGeometry.vertexBufferOffset = floorMeshData.VBOffset;
     floorGeometry.vertexBufferStride = floorMeshData.VBStride;
 
-    Geometry cubeGeometry;
+    //Geometry cubeGeometry;
     cubeGeometry.indexBuffer = cubeMeshData.IndexBuffer;
     cubeGeometry.vertexBuffer = cubeMeshData.VertexBuffer;
     cubeGeometry.numberOfIndices = cubeMeshData.IndexCount;
     cubeGeometry.vertexBufferOffset = cubeMeshData.VBOffset;
     cubeGeometry.vertexBufferStride = cubeMeshData.VBStride;
 
-    Geometry aeroplaneGeometry;
+    //Geometry aeroplaneGeometry;
     aeroplaneGeometry.indexBuffer = aeroplaneMeshData.IndexBuffer;
     aeroplaneGeometry.vertexBuffer = aeroplaneMeshData.VertexBuffer;
     aeroplaneGeometry.numberOfIndices = aeroplaneMeshData.IndexCount;
     aeroplaneGeometry.vertexBufferOffset = aeroplaneMeshData.VBOffset;
     aeroplaneGeometry.vertexBufferStride = aeroplaneMeshData.VBStride;
 
-    Material shinyMaterial;
+    //Material shinyMaterial;
     shinyMaterial.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
     shinyMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     shinyMaterial.specular = XMFLOAT4(0.5f, 0.5f, 0.5, 1.0f);
     shinyMaterial.specularPower = 10.0f;
 
-    Material noSpecMaterial;
+    //Material noSpecMaterial;
     noSpecMaterial.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
     noSpecMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     noSpecMaterial.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -180,7 +176,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     _gameObjects.push_back(gameObject);
 
     gameObject = new GameObject("Aeroplane", aeroplaneGeometry, shinyMaterial);
-    gameObject->SetPosition(0.0f, 2.0f, 0.0f);
+    gameObject->SetPosition(2.0f, 2.0f, 0.0f);
     gameObject->SetScale(0.2f, 0.2f, 0.2f);
     gameObject->SetRotation(0.0f, 0.0f, 0.0f);
     gameObject->SetTextureRV(aeroplaneTextureData);
@@ -286,219 +282,6 @@ HRESULT Application::InitShadersAndInputLayout()
     _pImmediateContext->IASetInputLayout(_pVertexLayout);
 
 	return hr;
-}
-
-HRESULT Application::InitVertexBuffer()
-{
-	HRESULT hr;
-
-    // Create vertex buffer
-    SimpleVertex cubeVertices[] =
-    {
-        { XMFLOAT3( -1.0f, 1.0f, 1.0f ), XMFLOAT3( -1.0f, 1.0f, 1.0f ), XMFLOAT2(0.0f, 0.0f) },
-        { XMFLOAT3( 1.0f, 1.0f, 1.0f ), XMFLOAT3( 1.0f, 1.0f, 1.0f ), XMFLOAT2(1.0f, 0.0f) },
-        { XMFLOAT3( -1.0f, -1.0f, 1.0f ), XMFLOAT3( -1.0f, -1.0f, 1.0f ), XMFLOAT2(0.0f, 1.0f) },
-        { XMFLOAT3( 1.0f, -1.0f, 1.0f ), XMFLOAT3( 1.0f, -1.0f, 1.0f ), XMFLOAT2(1.0f, 1.0f) },
-        { XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-        { XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-        { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
-        { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
-    };
-
-    D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(SimpleVertex) * 8;
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA InitData;
-	ZeroMemory(&InitData, sizeof(InitData));
-    InitData.pSysMem = cubeVertices;
-
-    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pVertexBufferCube);
-
-    //SimpleVertex pyramidVertices[] =
-    //{
-    //    { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(-1.0f, -1.0f, -1.0f) },
-    //    { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f, -1.0f, 1.0f) },
-    //    { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, -1.0f, -1.0f) },
-    //    { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f, -1.0f, 1.0f) },
-    //    { XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-    //};
-
-    ////D3D11_BUFFER_DESC bd;
-    //ZeroMemory(&bd, sizeof(bd));
-    //bd.Usage = D3D11_USAGE_DEFAULT;
-    //bd.ByteWidth = sizeof(SimpleVertex) * 5;
-    //bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    //bd.CPUAccessFlags = 0;
-
-    ////D3D11_SUBRESOURCE_DATA InitData;
-    //ZeroMemory(&InitData, sizeof(InitData));
-    //InitData.pSysMem = pyramidVertices;
-
-    //hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pVertexBufferPyramid);
-
-    //SimpleVertex planeVertices[] =
-    //{
-    //    { XMFLOAT3(-10.0f, 10.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(-5.0f, 10.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(0.0f, 10.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(5.0f, 10.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(10.0f, 10.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(-10.0f, 5.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(-5.0f, 5.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(0.0f, 5.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(5.0f, 5.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(10.0f, 5.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(-10.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(-5.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(5.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(10.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(-10.0f, -5.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(-5.0f, -5.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(0.0f, -5.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(5.0f, -5.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(10.0f, -5.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(-10.0f, -10.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(-5.0f, -10.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(0.0f, -10.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(5.0f, -10.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //    { XMFLOAT3(10.0f, -10.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-    //};
-
-    ////D3D11_BUFFER_DESC bd;
-    //ZeroMemory(&bd, sizeof(bd));
-    //bd.Usage = D3D11_USAGE_DEFAULT;
-    //bd.ByteWidth = sizeof(SimpleVertex) * 25;
-    //bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    //bd.CPUAccessFlags = 0;
-
-    ////D3D11_SUBRESOURCE_DATA InitData;
-    //ZeroMemory(&InitData, sizeof(InitData));
-    //InitData.pSysMem = planeVertices;
-
-    //hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pVertexBufferPlane);
-
-    if (FAILED(hr))
-        return hr;
-
-	return S_OK;
-}
-
-HRESULT Application::InitIndexBuffer()
-{
-	HRESULT hr;
-
-    // Create index buffer
-    WORD cubeIndices[] =
-    {
-        1,0,3,
-        3,0,2,
-        5,1,7,
-        7,1,3,
-        4,5,6,
-        6,5,7,
-        0,4,2,
-        2,4,6,
-        0,1,4,
-        4,1,5,
-        3,2,7,
-        7,2,6,
-    };
-
-    D3D11_BUFFER_DESC bd;
-    ZeroMemory(&bd, sizeof(bd));
-
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(WORD) * cubeIndexNum;
-    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    bd.CPUAccessFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA InitData;
-    ZeroMemory(&InitData, sizeof(InitData));
-    InitData.pSysMem = cubeIndices;
-    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pIndexBufferCube);
-
-    //WORD pyramidIndices[] =
-    //{
-    //    3,4,1,
-    //    2,4,3,
-    //    0,4,2,
-    //    1,4,0,
-    //    3,1,0,
-    //    2,3,0,
-    //};
-
-    ////D3D11_BUFFER_DESC bd;
-    //ZeroMemory(&bd, sizeof(bd));
-
-    //bd.Usage = D3D11_USAGE_DEFAULT;
-    //bd.ByteWidth = sizeof(WORD) * pyramidIndexNum;
-    //bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    //bd.CPUAccessFlags = 0;
-
-    ////D3D11_SUBRESOURCE_DATA InitData;
-    //ZeroMemory(&InitData, sizeof(InitData));
-    //InitData.pSysMem = pyramidIndices;
-    //hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pIndexBufferPyramid);
-
-    //WORD planeIndices[] =
-    //{
-    //    0,1,5,
-    //    5,1,6,
-    //    1,2,6,
-    //    6,2,7,
-    //    2,3,7,
-    //    7,3,8,
-    //    3,4,8,
-    //    8,4,9,
-    //    5,6,10,
-    //    10,6,11,
-    //    6,7,11,
-    //    11,7,12,
-    //    7,8,12,
-    //    12,8,13,
-    //    8,9,13,
-    //    13,9,14,
-    //    10,11,15,
-    //    15,11,16,
-    //    11,12,16,
-    //    16,12,17,
-    //    12,13,17,
-    //    17,13,18,
-    //    13,14,18,
-    //    18,14,19,
-    //    15,16,20,
-    //    20,16,21,
-    //    16,17,21,
-    //    21,17,22,
-    //    17,18,22,
-    //    22,18,23,
-    //    18,19,23,
-    //    23,19,24,
-    //};
-
-    ////D3D11_BUFFER_DESC bd;
-    //ZeroMemory(&bd, sizeof(bd));
-
-    //bd.Usage = D3D11_USAGE_DEFAULT;
-    //bd.ByteWidth = sizeof(WORD) * planeIndexNum;
-    //bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    //bd.CPUAccessFlags = 0;
-
-    ////D3D11_SUBRESOURCE_DATA InitData;
-    //ZeroMemory(&InitData, sizeof(InitData));
-    //InitData.pSysMem = planeIndices;
-    //hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pIndexBufferPlane);
-
-
-    if (FAILED(hr))
-        return hr;
-
-	return S_OK;
 }
 
 HRESULT Application::InitWindow(HINSTANCE hInstance, int nCmdShow)
@@ -664,18 +447,6 @@ HRESULT Application::InitDevice()
 
 	InitShadersAndInputLayout();
 
-	InitVertexBuffer();
-
-    // Set vertex buffer
-    //UINT stride = sizeof(SimpleVertex); <------------
-    //UINT offset = 0; <----------------
-    //_pImmediateContext->IASetVertexBuffers(0, 1, &_pVertexBufferPyramid, &stride, &offset); <--------------------
-
-	InitIndexBuffer();
-
-    // Set index buffer
-    //_pImmediateContext->IASetIndexBuffer(_pIndexBufferPyramid, DXGI_FORMAT_R16_UINT, 0); <---------------------
-
     // Set primitive topology
     _pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -693,7 +464,6 @@ HRESULT Application::InitDevice()
     wfdesc.FillMode = D3D11_FILL_WIREFRAME;
     wfdesc.CullMode = D3D11_CULL_NONE;
     hr = _pd3dDevice->CreateRasterizerState(&wfdesc, &_wireFrame);
-    //_pImmediateContext->RSSetState(_wireFrame);
 
     if (FAILED(hr))
         return hr;
@@ -724,161 +494,237 @@ void Application::Cleanup()
     if (_wireFrame) _wireFrame->Release();
 }
 
+void Application::CreateObject(int objectNum)
+{
+    switch (objectNum)
+    {
+    case 0:
+        gameObject = new GameObject("Floor", floorGeometry, noSpecMaterial);
+        gameObject->SetPosition(_camera->GetPosition());
+        gameObject->SetScale(objectScaleNumber, objectScaleNumber, objectScaleNumber);
+        gameObject->SetRotation(0.0f, 0.0f, 0.0f);
+        gameObject->SetTextureRV(floorTextureData);
+
+        _gameObjects.push_back(gameObject);
+        break;
+    case 1:
+        gameObject = new GameObject("Cube", cubeGeometry, shinyMaterial);
+        gameObject->SetPosition(_camera->GetPosition());
+        gameObject->SetScale(objectScaleNumber, objectScaleNumber, objectScaleNumber);
+        gameObject->SetRotation(0.0f, 0.0f, 0.0f);
+        gameObject->SetTextureRV(cubeTextureData);
+
+        _gameObjects.push_back(gameObject);
+        break;
+    case 2:
+        gameObject = new GameObject("Aeroplane", aeroplaneGeometry, shinyMaterial);
+        gameObject->SetPosition(_camera->GetPosition());
+        gameObject->SetScale(objectScaleNumber, objectScaleNumber, objectScaleNumber);
+        gameObject->SetRotation(0.0f, 0.0f, 0.0f);
+        gameObject->SetTextureRV(aeroplaneTextureData);
+
+        _gameObjects.push_back(gameObject);
+        break;
+    default:
+        break;
+    }
+}
+
 void Application::Update()
 {
     // Update our time
-    static float t = 0.0f;
+    static float deltaTime = 0.0f;
+    static DWORD dwTimeStart = 0.0f;
+    const float frameRate = 1.0f / 60.0f;
 
-    cameraDetectDelay++;
+    DWORD dwTimeCur = GetTickCount();
 
-    POINT cursorPosOld, cursorPosNew;
-    cursorPosOld.x = _WindowWidth / 2;
-    cursorPosOld.y = _WindowHeight / 2;
+    //if (dwTimeStart == 0)
+    //    dwTimeStart = dwTimeCur;
+    deltaTime += (dwTimeCur - dwTimeStart) / 1000.0f;
 
-    if (cameraDetectDelay == 3)
+    //if (_driverType == D3D_DRIVER_TYPE_REFERENCE)
+    //{
+    //    t += (float) XM_PI * 0.0125f;
+    //}
+    //else
+    //{
+    //    static DWORD dwTimeStart = 0;
+    //    DWORD dwTimeCur = GetTickCount();
+
+    //    if (dwTimeStart == 0)
+    //        dwTimeStart = dwTimeCur;
+
+    //    t = (dwTimeCur - dwTimeStart) / 1000.0f;
+    //}
+
+    
+    if (deltaTime < frameRate)
     {
-        SetCursorPos(cursorPosOld.x, cursorPosOld.y);
-        cameraDetectDelay = 0;
-    }
-
-    if (_driverType == D3D_DRIVER_TYPE_REFERENCE)
-    {
-        t += (float) XM_PI * 0.0125f;
+        return;
     }
     else
     {
-        static DWORD dwTimeStart = 0;
-        DWORD dwTimeCur = GetTickCount();
+        for (auto gameObject : _gameObjects)
+        {
+            gameObject->Update(deltaTime);
+        }
 
-        if (dwTimeStart == 0)
-            dwTimeStart = dwTimeCur;
+        cameraDetectDelay++;
 
-        t = (dwTimeCur - dwTimeStart) / 1000.0f;
+        XMFLOAT3 cubeRotation = _gameObjects[1]->GetRotation();
+        cubeRotation.y += 0.01f;
+        _gameObjects[1]->SetRotation(cubeRotation);
+
+        POINT cursorPosOld, cursorPosNew;
+        cursorPosOld.x = _WindowWidth / 2;
+        cursorPosOld.y = _WindowHeight / 2;
+
+        if (cameraDetectDelay == 3)
+        {
+            SetCursorPos(cursorPosOld.x, cursorPosOld.y);
+            cameraDetectDelay = 0;
+        }
+
+        //Camera controls
+        if (GetAsyncKeyState(VK_UP))
+            selectedCameraNum = 0;
+        if (GetAsyncKeyState(VK_DOWN))
+            selectedCameraNum = 1;
+
+        if (selectedCameraNum == 0)
+        {
+            XMFLOAT3 cameraPos = _camera->GetPosition();
+            XMFLOAT3 atPos = _camera->GetLookAt();
+            if (GetAsyncKeyState(VK_ESCAPE))
+            {
+                exit(0);
+            }
+
+            if (GetAsyncKeyState(0x57))
+            {
+                cameraPos.z += 0.1f;
+            }
+            if (GetAsyncKeyState(0x53))
+            {
+                cameraPos.z -= 0.1f;
+            }
+            if (GetAsyncKeyState(0x41))
+            {
+                cameraPos.x -= 0.1f;
+            }
+            if (GetAsyncKeyState(0x44))
+            {
+                cameraPos.x += 0.1f;
+            }
+
+            if (GetAsyncKeyState(VK_NUMPAD0))
+                objectCreateNumber = 0;
+            if (GetAsyncKeyState(VK_NUMPAD1))
+                objectCreateNumber = 1;
+            if (GetAsyncKeyState(VK_NUMPAD2))
+                objectCreateNumber = 2;
+
+            if (GetAsyncKeyState(VK_ADD))
+                objectScaleNumber += 0.01f;
+            if (GetAsyncKeyState(VK_SUBTRACT))
+                objectScaleNumber -= 0.01f;
+
+            if (objectScaleNumber < 0.01f)
+                objectScaleNumber = 0.02f;
+
+            if (GetAsyncKeyState(MK_LBUTTON))
+            {
+                CreateObject(objectCreateNumber);
+            }
+
+            POINT mouseDirection;
+            mouseDirection.x = mouseDirection.y = 0;
+
+            GetCursorPos(&cursorPosNew);
+            if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x == cursorPosNew.x) //Detect looking down
+                atPos.y -= 0.1f;
+            if (cursorPosOld.x > cursorPosNew.x && cursorPosOld.y == cursorPosNew.y) //Right
+                atPos.x -= 0.1f;
+            if (cursorPosOld.x < cursorPosNew.x && cursorPosOld.y == cursorPosNew.y) //Left
+                atPos.x += 0.1f;
+            if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x == cursorPosNew.x) //Up
+                atPos.y += 0.1f;
+            if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x < cursorPosNew.x) //Up left
+            {
+                atPos.x += 0.07f;
+                atPos.y += 0.07f;
+            }
+            if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x > cursorPosNew.x) //Up right
+            {
+                atPos.x -= 0.07f;
+                atPos.y += 0.07f;
+            }
+            if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x < cursorPosNew.x) //Down left
+            {
+                atPos.x += 0.07f;
+                atPos.y -= 0.07f;
+            }
+            if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x > cursorPosNew.x) //Down right
+            {
+                atPos.x -= 0.07f;
+                atPos.y -= 0.07f;
+            }
+
+            //float distanceBetweenPosAndAt = sqrt(pow((atPos.x + cameraPos.x), 2) + pow((atPos.y + cameraPos.y), 2) + pow((atPos.z - cameraPos.z), 2));
+
+            //if (distanceBetweenPosAndAt > 30)
+            //{
+            //    atPos.z -= 0.1f;
+            //}
+            //if (distanceBetweenPosAndAt < 30)
+            //{
+            //    atPos.z += 0.1f;
+            //}
+
+            //if (GetAsyncKeyState(VK_NUMPAD8))
+            //    _cameraOrbitRadius = max(_cameraOrbitRadiusMin, _cameraOrbitRadius - (_cameraSpeed * 0.2f));
+            //if (GetAsyncKeyState(VK_NUMPAD2))
+            //    _cameraOrbitRadius = min(_cameraOrbitRadiusMax, _cameraOrbitRadius + (_cameraSpeed * 0.2f));
+            //if (GetAsyncKeyState(VK_NUMPAD6))
+            //    _cameraOrbitAngleXZ += _cameraSpeed;
+            //if (GetAsyncKeyState(VK_NUMPAD4))
+            //    _cameraOrbitAngleXZ -= _cameraSpeed;
+
+            //float angleAroundZ = XMConvertToRadians(_cameraOrbitAngleXZ);
+            //float x = _cameraOrbitRadius * cos(angleAroundZ);
+            //float z = _cameraOrbitRadius * sin(angleAroundZ);
+
+            //cameraPos.x = x;
+            //cameraPos.z = z;
+
+            _camera->SetPosition(cameraPos);
+            _camera->SetLookAt(atPos);
+            _camera->Update();
+        }
+
+        if (selectedCameraNum == 1)
+        {
+            XMFLOAT3 cameraPos = _camera2->GetPosition();
+            _camera2->SetPosition(cameraPos);
+            _camera2->Update();
+        }
+
+        if (GetAsyncKeyState(VK_RETURN))
+        {
+            XMFLOAT3 position = _gameObjects[1]->GetPosition();
+            position.z += 0.02f;
+            _gameObjects[1]->SetPosition(position);
+        }
+        else if (GetAsyncKeyState(VK_BACK))
+        {
+            XMFLOAT3 position = _gameObjects[1]->GetPosition();
+            position.z -= 0.02f;
+            _gameObjects[1]->SetPosition(position);
+        }
     }
 
-    //gameObject->Update(t);
-    
-    for (auto gameObject : _gameObjects)
-    {
-        gameObject->Update(t);
-    }
-
-    //Camera controls
-    if (GetAsyncKeyState(VK_UP))
-        selectedCameraNum = 0;
-    if (GetAsyncKeyState(VK_DOWN))
-        selectedCameraNum = 1;
-
-    if (selectedCameraNum == 0)
-    {
-        XMFLOAT3 cameraPos = _camera->GetPosition();
-        XMFLOAT3 atPos = _camera->GetLookAt();
-        if (GetAsyncKeyState(VK_ESCAPE))
-        {
-            exit(0);
-        }
-
-        if (GetAsyncKeyState(0x57))
-        {
-            cameraPos.z += 0.1f;
-        }
-        if (GetAsyncKeyState(0x53))
-        {
-            cameraPos.z -= 0.1f;
-        }
-        if (GetAsyncKeyState(0x41))
-        {
-            cameraPos.x -= 0.1f;
-        }
-        if (GetAsyncKeyState(0x44))
-        {
-            cameraPos.x += 0.1f;
-        }
-
-        POINT mouseDirection;
-        mouseDirection.x = mouseDirection.y = 0;
-
-        GetCursorPos(&cursorPosNew);
-        if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x == cursorPosNew.x) //Detect looking down
-            atPos.y -= 0.1f;
-        if (cursorPosOld.x > cursorPosNew.x && cursorPosOld.y == cursorPosNew.y) //Right
-            atPos.x -= 0.1f;
-        if (cursorPosOld.x < cursorPosNew.x && cursorPosOld.y == cursorPosNew.y) //Left
-            atPos.x += 0.1f;
-        if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x == cursorPosNew.x) //Up
-            atPos.y += 0.1f;
-        if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x < cursorPosNew.x) //Up left
-        {
-            atPos.x += 0.07f;
-            atPos.y += 0.07f;
-        }
-        if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x > cursorPosNew.x) //Up right
-        {
-            atPos.x -= 0.07f;
-            atPos.y += 0.07f;
-        }
-        if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x < cursorPosNew.x) //Down left
-        {
-            atPos.x += 0.07f;
-            atPos.y -= 0.07f;
-        }
-        if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x > cursorPosNew.x) //Down right
-        {
-            atPos.x -= 0.07f;
-            atPos.y -= 0.07f;
-        }
-        
-        //float distanceBetweenPosAndAt = sqrt(pow((atPos.x + cameraPos.x), 2) + pow((atPos.y + cameraPos.y), 2) + pow((atPos.z - cameraPos.z), 2));
-
-        //if (distanceBetweenPosAndAt > 30)
-        //{
-        //    atPos.z -= 0.1f;
-        //}
-        //if (distanceBetweenPosAndAt < 30)
-        //{
-        //    atPos.z += 0.1f;
-        //}
-
-        //if (GetAsyncKeyState(VK_NUMPAD8))
-        //    _cameraOrbitRadius = max(_cameraOrbitRadiusMin, _cameraOrbitRadius - (_cameraSpeed * 0.2f));
-        //if (GetAsyncKeyState(VK_NUMPAD2))
-        //    _cameraOrbitRadius = min(_cameraOrbitRadiusMax, _cameraOrbitRadius + (_cameraSpeed * 0.2f));
-        //if (GetAsyncKeyState(VK_NUMPAD6))
-        //    _cameraOrbitAngleXZ += _cameraSpeed;
-        //if (GetAsyncKeyState(VK_NUMPAD4))
-        //    _cameraOrbitAngleXZ -= _cameraSpeed;
-
-        //float angleAroundZ = XMConvertToRadians(_cameraOrbitAngleXZ);
-        //float x = _cameraOrbitRadius * cos(angleAroundZ);
-        //float z = _cameraOrbitRadius * sin(angleAroundZ);
-
-        //cameraPos.x = x;
-        //cameraPos.z = z;
-
-        _camera->SetPosition(cameraPos);
-        _camera->SetLookAt(atPos);
-        _camera->Update();
-    }
-
-    if (selectedCameraNum == 1)
-    {
-        XMFLOAT3 cameraPos = _camera2->GetPosition();
-        _camera2->SetPosition(cameraPos);
-        _camera2->Update();
-    }
-
-    if (GetAsyncKeyState(VK_RETURN))
-    {
-        XMFLOAT3 position = _gameObjects[1]->GetPosition();
-        position.z += 0.02f;
-        _gameObjects[1]->SetPosition(position);
-    }
-    else if (GetAsyncKeyState(VK_BACK))
-    {
-        XMFLOAT3 position = _gameObjects[1]->GetPosition();
-        position.z -= 0.02f;
-        _gameObjects[1]->SetPosition(position);
-    }
+    deltaTime = deltaTime - frameRate;
 
     //XMStoreFloat4x4(&_world, XMMatrixRotationY(t));
     //XMStoreFloat4x4(&_world, XMMatrixTranslation(0.0f, 0.0f, 0.0f));
@@ -896,7 +742,7 @@ void Application::Draw()
     // Clear the back buffer
     //
     //float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f}; // red,green,blue,alpha
-    float ClearColor[4] = {0.0f, 0.7f, 0.8f, 1.0f}; // red,green,blue,alpha
+    float ClearColor[4] = {1.0f, 1.0f, 1.0f, 1.0f}; // red,green,blue,alpha
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
     _pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
