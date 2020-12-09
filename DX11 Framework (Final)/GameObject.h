@@ -38,7 +38,7 @@ public:
 	XMFLOAT3 GetPosition() const { return _position; }
 
 	void SetScale(XMFLOAT3 scale) { _scale = scale; }
-	void SetScale(float x, float y, float z) { _scale.x = x; _scale.y = y; _scale.z; }
+	void SetScale(float x, float y, float z) { _scale.x = x; _scale.y = y; _scale.z = z; }
 
 	XMFLOAT3 GetScale() const { return _scale; }
 

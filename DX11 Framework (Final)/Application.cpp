@@ -48,7 +48,7 @@ Application::Application()
     _camera = nullptr;
     _camera2 = nullptr;
     _transparency = nullptr;
-    gameObject = nullptr;
+    //gameObject = nullptr;
 }
 
 Application::~Application()
@@ -123,10 +123,12 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 	//XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XM_PIDIV2, _WindowWidth / (FLOAT) _WindowHeight, 0.01f, 100.0f));
 
     floorMeshData = OBJLoader::Load("Assets/Plane.obj", _pd3dDevice, false);
-    objMeshData2 = OBJLoader::Load("Assets/Cube.obj", _pd3dDevice, false);
+    cubeMeshData = OBJLoader::Load("Assets/Cube.obj", _pd3dDevice, false);
+    aeroplaneMeshData = OBJLoader::Load("Assets/Hercules.obj", _pd3dDevice, false);
 
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/Brick.dds", nullptr, &floorTextureData);
-    CreateDDSTextureFromFile(_pd3dDevice, L"Assets/PineTree.dds", nullptr, &objTextureData2);
+    CreateDDSTextureFromFile(_pd3dDevice, L"Assets/PineTree.dds", nullptr, &cubeTextureData);
+    CreateDDSTextureFromFile(_pd3dDevice, L"Assets/HERCULES_COLOR.dds", nullptr, &aeroplaneTextureData);
 
     Geometry floorGeometry;
     floorGeometry.indexBuffer = floorMeshData.IndexBuffer;
@@ -135,17 +137,55 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     floorGeometry.vertexBufferOffset = floorMeshData.VBOffset;
     floorGeometry.vertexBufferStride = floorMeshData.VBStride;
 
+    Geometry cubeGeometry;
+    cubeGeometry.indexBuffer = cubeMeshData.IndexBuffer;
+    cubeGeometry.vertexBuffer = cubeMeshData.VertexBuffer;
+    cubeGeometry.numberOfIndices = cubeMeshData.IndexCount;
+    cubeGeometry.vertexBufferOffset = cubeMeshData.VBOffset;
+    cubeGeometry.vertexBufferStride = cubeMeshData.VBStride;
+
+    Geometry aeroplaneGeometry;
+    aeroplaneGeometry.indexBuffer = aeroplaneMeshData.IndexBuffer;
+    aeroplaneGeometry.vertexBuffer = aeroplaneMeshData.VertexBuffer;
+    aeroplaneGeometry.numberOfIndices = aeroplaneMeshData.IndexCount;
+    aeroplaneGeometry.vertexBufferOffset = aeroplaneMeshData.VBOffset;
+    aeroplaneGeometry.vertexBufferStride = aeroplaneMeshData.VBStride;
+
     Material shinyMaterial;
     shinyMaterial.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
     shinyMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     shinyMaterial.specular = XMFLOAT4(0.5f, 0.5f, 0.5, 1.0f);
     shinyMaterial.specularPower = 10.0f;
 
-    gameObject = new GameObject("Floor", floorGeometry, shinyMaterial);
+    Material noSpecMaterial;
+    noSpecMaterial.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+    noSpecMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    noSpecMaterial.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+    noSpecMaterial.specularPower = 0.0f;
+
+    gameObject = new GameObject("Floor", floorGeometry, noSpecMaterial);
     gameObject->SetPosition(0.0f, 0.0f, 0.0f);
-    gameObject->SetScale(0.0f, 0.0f, 0.0f);
+    gameObject->SetScale(1.0f, 1.0f, 1.0f);
     gameObject->SetRotation(0.0f, 0.0f, 0.0f);
     gameObject->SetTextureRV(floorTextureData);
+
+    _gameObjects.push_back(gameObject);
+
+    gameObject = new GameObject("Cube", cubeGeometry, shinyMaterial);
+    gameObject->SetPosition(0.0f, 1.0f, 0.0f);
+    gameObject->SetScale(1.0f, 1.0f, 1.0f);
+    gameObject->SetRotation(0.0f, 0.0f, 0.0f);
+    gameObject->SetTextureRV(cubeTextureData);
+
+    _gameObjects.push_back(gameObject);
+
+    gameObject = new GameObject("Aeroplane", aeroplaneGeometry, shinyMaterial);
+    gameObject->SetPosition(0.0f, 2.0f, 0.0f);
+    gameObject->SetScale(0.2f, 0.2f, 0.2f);
+    gameObject->SetRotation(0.0f, 0.0f, 0.0f);
+    gameObject->SetTextureRV(aeroplaneTextureData);
+
+    _gameObjects.push_back(gameObject);
 
     //Create the sample state
     D3D11_SAMPLER_DESC sampDesc;
@@ -716,6 +756,13 @@ void Application::Update()
         t = (dwTimeCur - dwTimeStart) / 1000.0f;
     }
 
+    //gameObject->Update(t);
+    
+    for (auto gameObject : _gameObjects)
+    {
+        gameObject->Update(t);
+    }
+
     //Camera controls
     if (GetAsyncKeyState(VK_UP))
         selectedCameraNum = 0;
@@ -792,6 +839,22 @@ void Application::Update()
         //    atPos.z += 0.1f;
         //}
 
+        //if (GetAsyncKeyState(VK_NUMPAD8))
+        //    _cameraOrbitRadius = max(_cameraOrbitRadiusMin, _cameraOrbitRadius - (_cameraSpeed * 0.2f));
+        //if (GetAsyncKeyState(VK_NUMPAD2))
+        //    _cameraOrbitRadius = min(_cameraOrbitRadiusMax, _cameraOrbitRadius + (_cameraSpeed * 0.2f));
+        //if (GetAsyncKeyState(VK_NUMPAD6))
+        //    _cameraOrbitAngleXZ += _cameraSpeed;
+        //if (GetAsyncKeyState(VK_NUMPAD4))
+        //    _cameraOrbitAngleXZ -= _cameraSpeed;
+
+        //float angleAroundZ = XMConvertToRadians(_cameraOrbitAngleXZ);
+        //float x = _cameraOrbitRadius * cos(angleAroundZ);
+        //float z = _cameraOrbitRadius * sin(angleAroundZ);
+
+        //cameraPos.x = x;
+        //cameraPos.z = z;
+
         _camera->SetPosition(cameraPos);
         _camera->SetLookAt(atPos);
         _camera->Update();
@@ -804,9 +867,22 @@ void Application::Update()
         _camera2->Update();
     }
 
+    if (GetAsyncKeyState(VK_RETURN))
+    {
+        XMFLOAT3 position = _gameObjects[1]->GetPosition();
+        position.z += 0.02f;
+        _gameObjects[1]->SetPosition(position);
+    }
+    else if (GetAsyncKeyState(VK_BACK))
+    {
+        XMFLOAT3 position = _gameObjects[1]->GetPosition();
+        position.z -= 0.02f;
+        _gameObjects[1]->SetPosition(position);
+    }
+
     //XMStoreFloat4x4(&_world, XMMatrixRotationY(t));
     //XMStoreFloat4x4(&_world, XMMatrixTranslation(0.0f, 0.0f, 0.0f));
-    XMStoreFloat4x4(&_world2, XMMatrixTranslation(0.0f, 3.0f, 0.0f));
+    //XMStoreFloat4x4(&_world2, XMMatrixTranslation(0.0f, 3.0f, 0.0f));
     //XMStoreFloat4x4(&_world2, XMMatrixRotationZ(t) * XMMatrixTranslation(7.5f, 0.0f, 2.0f) * XMMatrixScaling(0.4f, 0.4f, 0.4f) * XMMatrixRotationZ(t * 1.3));
     //XMStoreFloat4x4(&_world3, XMMatrixRotationZ(t) * XMMatrixTranslation(10.0f, 0.0f, 2.0f) * XMMatrixScaling(0.4f, 0.4f, 0.4f) * XMMatrixRotationZ(t));
     //XMStoreFloat4x4(&_world4, XMMatrixRotationZ(t) * XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixTranslation(5.0f, 0.0f, 2.0f));
@@ -820,21 +896,29 @@ void Application::Draw()
     // Clear the back buffer
     //
     //float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f}; // red,green,blue,alpha
-    float ClearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f}; // red,green,blue,alpha
-
+    float ClearColor[4] = {0.0f, 0.7f, 0.8f, 1.0f}; // red,green,blue,alpha
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
     _pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	XMMATRIX world = XMLoadFloat4x4(&_world);
+    //_pImmediateContext->IAGetInputLayout(_pVertexLayout);
+
+    _pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
+    _pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
+    _pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
+    _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
+    _pImmediateContext->PSSetSamplers(0, 1, &_pSamplerLinear);
+
+	//XMMATRIX world = XMLoadFloat4x4(&_world);
 	XMMATRIX view = XMLoadFloat4x4(&_camera->GetView());
 	XMMATRIX projection = XMLoadFloat4x4(&_camera->GetProjection());
     XMMATRIX view2 = XMLoadFloat4x4(&_camera2->GetView());
     XMMATRIX projection2 = XMLoadFloat4x4(&_camera2->GetProjection());
+
     //
     // Update variables
     //
     ConstantBuffer cb;
-	cb.mWorld = XMMatrixTranspose(world);
+	//cb.mWorld = XMMatrixTranspose(world);
     //cb.mWorld = XMMatrixTranspose(gameobject->GetWorldMatrix())
     if (selectedCameraNum == 1)
     {
@@ -846,6 +930,7 @@ void Application::Draw()
         cb.mView = XMMatrixTranspose(view);
         cb.mProjection = XMMatrixTranspose(projection);
     }
+
     //cb.gTime = timeFromUpdateFunction;
     cb.DiffuseMtrl = diffuseMaterial;
     cb.DiffuseLight = diffuseLight;
@@ -858,8 +943,6 @@ void Application::Draw()
     //cb.EyePosW = eyePosW;
     cb.EyePosW = _camera->GetPosition();
 
-	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
-
     if (GetAsyncKeyState(VK_LEFT))
     {
         _pImmediateContext->RSSetState(NULL);
@@ -870,39 +953,43 @@ void Application::Draw()
         _pImmediateContext->RSSetState(_wireFrame);
     }
 
-	_pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
-	_pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
-    _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
-    _pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
+    for (auto gameObject : _gameObjects)
+    {
+        Material material = gameObject->GetMaterialData();
+        cb.AmbientMtrl = material.ambient;
+        cb.DiffuseMtrl = material.diffuse;
+        cb.SpecularMtrl = material.specular;
 
-    ID3D11ShaderResourceView* textureRV = gameObject->GetTextureRV();
-    _pImmediateContext->PSSetShaderResources(0, 1, &textureRV);
-    //_pImmediateContext->PSSetShaderResources(0, 1, &floorTextureData);
-    _pImmediateContext->PSSetSamplers(0, 1, &_pSamplerLinear);
+        cb.mWorld = XMMatrixTranspose(gameObject->GetWorldMatrix());
 
-    //_pImmediateContext->IASetVertexBuffers(0, 1, &floorMeshData.VertexBuffer, &floorMeshData.VBStride, &floorMeshData.VBOffset);
-    //_pImmediateContext->IASetIndexBuffer(floorMeshData.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+        if (gameObject->HasTexture())
+        {
+            ID3D11ShaderResourceView* textureRV = gameObject->GetTextureRV();
+            _pImmediateContext->PSSetShaderResources(0, 1, &textureRV);
+        }
+
+        //_pImmediateContext->PSSetSamplers(0, 1, &_pSamplerLinear);
+
+        _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+
+        gameObject->Draw(_pImmediateContext);
+    }
 
     //"Fine-tune" the blending equation
-    float blendFactor[] = { 0.75f, 0.75f, 0.75f, 1.0f };
+    //float blendFactor[] = { 0.75f, 0.75f, 0.75f, 1.0f };
     //Set the default blend state (no blending) for opaque objects
-    _pImmediateContext->OMSetBlendState(0, 0, 0xffffffff);
-
+    //_pImmediateContext->OMSetBlendState(0, 0, 0xffffffff);
     //Render opaque objects
-    gameObject->Draw(_pImmediateContext);
-
     //Set the blend state for transparent objects
-    _pImmediateContext->OMSetBlendState(_transparency, blendFactor, 0xffffffff);
-    //_pImmediateContext->DrawIndexed(floorMeshData.IndexCount, 0, 0);
-    //gameobject->Draw(_pImmediateContext);
+    //_pImmediateContext->OMSetBlendState(_transparency, blendFactor, 0xffffffff);
 
-    world = XMLoadFloat4x4(&_world2);
-    cb.mWorld = XMMatrixTranspose(world);
-    _pImmediateContext->PSSetShaderResources(0, 1, &objTextureData2);
-    _pImmediateContext->IASetVertexBuffers(0, 1, &objMeshData2.VertexBuffer, &objMeshData2.VBStride, &objMeshData2.VBOffset);
-    _pImmediateContext->IASetIndexBuffer(objMeshData2.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-    _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
-    _pImmediateContext->DrawIndexed(objMeshData2.IndexCount, 0, 0);
+    //world = XMLoadFloat4x4(&_world2);
+    //cb.mWorld = XMMatrixTranspose(world);
+    //_pImmediateContext->PSSetShaderResources(0, 1, &objTextureData2);
+    //_pImmediateContext->IASetVertexBuffers(0, 1, &objMeshData2.VertexBuffer, &objMeshData2.VBStride, &objMeshData2.VBOffset);
+    //_pImmediateContext->IASetIndexBuffer(objMeshData2.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+    //_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+    //_pImmediateContext->DrawIndexed(objMeshData2.IndexCount, 0, 0);
 
     //world = XMLoadFloat4x4(&_world2);
     //cb.mWorld = XMMatrixTranspose(world);
@@ -910,27 +997,6 @@ void Application::Draw()
     //_pImmediateContext->IASetIndexBuffer(_pIndexBufferCube, DXGI_FORMAT_R16_UINT, 0);
     //_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
     //_pImmediateContext->DrawIndexed(cubeIndexNum, 0, 0);
-
-    //world = XMLoadFloat4x4(&_world3);
-    //cb.mWorld = XMMatrixTranspose(world);
-    //_pImmediateContext->IASetVertexBuffers(0, 1, &_pVertexBufferPyramid, &stride, &offset);
-    //_pImmediateContext->IASetIndexBuffer(_pIndexBufferPyramid, DXGI_FORMAT_R16_UINT, 0);
-    //_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
-    //_pImmediateContext->DrawIndexed(pyramidIndexNum, 0, 0);
-
-    //world = XMLoadFloat4x4(&_world4);
-    //cb.mWorld = XMMatrixTranspose(world);
-    //_pImmediateContext->IASetVertexBuffers(0, 1, &_pVertexBufferPyramid, &stride, &offset);
-    //_pImmediateContext->IASetIndexBuffer(_pIndexBufferPyramid, DXGI_FORMAT_R16_UINT, 0);
-    //_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
-    //_pImmediateContext->DrawIndexed(pyramidIndexNum, 0, 0);
-
-    //world = XMLoadFloat4x4(&_world5);
-    //cb.mWorld = XMMatrixTranspose(world);
-    //_pImmediateContext->IASetVertexBuffers(0, 1, &_pVertexBufferPlane, &stride, &offset);
-    //_pImmediateContext->IASetIndexBuffer(_pIndexBufferPlane, DXGI_FORMAT_R16_UINT, 0);
-    //_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
-    //_pImmediateContext->DrawIndexed(planeIndexNum, 0, 0);
 
     //
     // Present our back buffer to our front buffer

@@ -11,6 +11,7 @@
 #include "OBJLoader.h"
 #include "Camera.h"
 #include "GameObject.h"
+#include <vector>
 
 using namespace DirectX;
 
@@ -35,7 +36,8 @@ private:
 	ID3D11Buffer*			_pVertexBufferPlane;
 	ID3D11Buffer*			_pIndexBufferPlane;
 	ID3D11Buffer*           _pConstantBuffer;
-	XMFLOAT4X4              _world, _world2, _world3, _world4, _world5;
+	//XMFLOAT4X4              _world, _world2, _world3, _world4, _world5;
+	XMFLOAT4X4              _world;
 	//XMFLOAT4X4              _view;
 	//XMFLOAT4X4              _projection;
 	ID3D11DepthStencilView* _depthStencilView;
@@ -58,9 +60,11 @@ private:
 	XMFLOAT3				eyePosW;
 
 	MeshData				floorMeshData;
+	MeshData				cubeMeshData;
+	MeshData				aeroplaneMeshData;
 	ID3D11ShaderResourceView* floorTextureData = nullptr;
-	MeshData				objMeshData2;
-	ID3D11ShaderResourceView* objTextureData2 = nullptr;
+	ID3D11ShaderResourceView* cubeTextureData = nullptr;
+	ID3D11ShaderResourceView* aeroplaneTextureData = nullptr;
 
 	int selectedCameraNum = 0;
 
@@ -83,6 +87,7 @@ private:
 	UINT _WindowHeight;
 	UINT _WindowWidth;
 
+	vector<GameObject*> _gameObjects;
 	GameObject* gameObject;
 
 	Camera* _camera;
