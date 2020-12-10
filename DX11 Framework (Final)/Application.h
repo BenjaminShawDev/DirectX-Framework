@@ -76,12 +76,15 @@ private:
 	ID3D11ShaderResourceView* barrelTextureData = nullptr;
 	ID3D11ShaderResourceView* ufoTextureData = nullptr;
 
-	int selectedCameraNum = 0;
-	int cameraDetectDelay = 0;
+	int selectedCameraNum;
+	int mouseMovementDetectDelay = 0;
 	int objectCreateNumber = 0;
 	float objectScaleNumber = 1.0f;
+	float objectTransformRate = 1.0f;
 	bool isLMouseDown, isZDown, isTabDown, isAsteriskDown = false;
 	bool showWireFrame = false;
+	bool doDraw;
+
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
@@ -91,6 +94,7 @@ private:
 	HRESULT InitShadersAndInputLayout();
 
 	void CreateObject(int objectNum, bool isShiny);
+	void UserKeyboardInput(float deltaTime);
 
 	UINT _WindowHeight;
 	UINT _WindowWidth;
@@ -99,15 +103,10 @@ private:
 	GameObject* gameObject;
 	GameObject* prevGameObject;
 
-	Camera* _camera1;
-	Camera* _camera2;
-	Camera* _camera3;
-	Camera* _camera4;
-	float _cameraOrbitRadius = 7.0f;
-	float _cameraOrbitRadiusMin = 2.0f;
-	float _cameraOrbitRadiusMax = 50.0f;
-	float _cameraOrbitAngleXZ = -90.0f;
-	float _cameraSpeed = 2.0f;
+	float formerObjectScale;
+
+	vector<Camera*> _cameras;
+	Camera* _camera;
 
 	UINT _renderHeight = 1080;
 	UINT _renderWidth = 1920;
