@@ -21,5 +21,13 @@ C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Applicati
 C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(882,58): warning C4238: nonstandard extension used: class rvalue used as lvalue
 C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(883,70): warning C4238: nonstandard extension used: class rvalue used as lvalue
 C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(884,58): warning C4238: nonstandard extension used: class rvalue used as lvalue
+  Camera.cpp
+  DDSTextureLoader.cpp
+  DX11 Framework.cpp
+  GameObject.cpp
 C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(885,70): warning C4238: nonstandard extension used: class rvalue used as lvalue
+  OBJLoader.cpp
+  Generating Code...
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\GameObject.cpp(18,31): warning C4100: 't': unreferenced formal parameter
+Application.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
   DX11 Framework.vcxproj -> C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Debug\DX11 Framework.exe
