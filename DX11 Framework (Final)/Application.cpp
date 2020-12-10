@@ -45,10 +45,13 @@ Application::Application()
 	_pConstantBuffer = nullptr;
     _pTextureRV = nullptr;
     _pSamplerLinear = nullptr;
-    _camera = nullptr;
+    _camera1 = nullptr;
     _camera2 = nullptr;
+    _camera3 = nullptr;
+    _camera4 = nullptr;
     _transparency = nullptr;
     gameObject = nullptr;
+    prevGameObject = nullptr;
 }
 
 Application::~Application()
@@ -102,10 +105,10 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     selectedCameraNum = 0;
 
     XMFLOAT3 eye = XMFLOAT3(0.0f, 2.0f, -20.0f);
-    XMFLOAT3 at = XMFLOAT3(0.0f, 1.0f, 10.0f);
+    XMFLOAT3 at = XMFLOAT3(0.0f, 1.0f, 1.0f);
     XMFLOAT3 up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
-    _camera = new Camera(eye, at, up, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, true);
+    _camera1 = new Camera(eye, at, up, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, true);
 
     XMFLOAT3 eye2 = XMFLOAT3(20.0f, 1.0f, 0.0f);
     XMFLOAT3 at2 = XMFLOAT3(0.0f, 1.0f, 00.0f);
@@ -113,18 +116,32 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
     _camera2 = new Camera(eye2, at2, up2, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, false);
 
+    XMFLOAT3 eye3 = XMFLOAT3(0.0f, 20.0f, 1.0f);
+    XMFLOAT3 at3 = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    XMFLOAT3 up3 = XMFLOAT3(0.0f, 1.0f, 0.0f);
+
+    _camera3 = new Camera(eye3, at3, up3, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, false);
+
+    XMFLOAT3 eye4 = XMFLOAT3(0.0f, 1.0f, 20.0f);
+    XMFLOAT3 at4 = XMFLOAT3(0.0f, 1.0f, -1.0f);
+    XMFLOAT3 up4 = XMFLOAT3(0.0f, 1.0f, 00.0f);
+
+    _camera4 = new Camera(eye4, at4, up4, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, true);
+
     // Initialize the projection matrix
 	//XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XM_PIDIV2, _WindowWidth / (FLOAT) _WindowHeight, 0.01f, 100.0f));
 
     floorMeshData = OBJLoader::Load("Assets/Plane.obj", _pd3dDevice, false);
     cubeMeshData = OBJLoader::Load("Assets/Cube.obj", _pd3dDevice, false);
     aeroplaneMeshData = OBJLoader::Load("Assets/Hercules.obj", _pd3dDevice, false);
-    //aeroplaneMeshData = OBJLoader::Load("Assets/Cylinder.obj", _pd3dDevice, false);
+    barrelMeshData = OBJLoader::Load("Assets/Cylinder.obj", _pd3dDevice, false);
+    ufoMeshData = OBJLoader::Load("Assets/UFO.obj", _pd3dDevice, false);
 
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/Brick.dds", nullptr, &floorTextureData);
-    CreateDDSTextureFromFile(_pd3dDevice, L"Assets/PineTree.dds", nullptr, &cubeTextureData);
+    CreateDDSTextureFromFile(_pd3dDevice, L"Assets/Crate_COLOR.dds", nullptr, &cubeTextureData);
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/HERCULES_COLOR.dds", nullptr, &aeroplaneTextureData);
-    //CreateDDSTextureFromFile(_pd3dDevice, L"Assets/Cylinder2.dds", nullptr, &aeroplaneTextureData);
+    CreateDDSTextureFromFile(_pd3dDevice, L"Assets/Cylinder.dds", nullptr, &barrelTextureData);
+    CreateDDSTextureFromFile(_pd3dDevice, L"Assets/UFO.dds", nullptr, &ufoTextureData);
 
     //Geometry floorGeometry;
     floorGeometry.indexBuffer = floorMeshData.IndexBuffer;
@@ -147,6 +164,19 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     aeroplaneGeometry.vertexBufferOffset = aeroplaneMeshData.VBOffset;
     aeroplaneGeometry.vertexBufferStride = aeroplaneMeshData.VBStride;
 
+    //Barrel geometry
+    barrelGeometry.indexBuffer = barrelMeshData.IndexBuffer;
+    barrelGeometry.vertexBuffer = barrelMeshData.VertexBuffer;
+    barrelGeometry.numberOfIndices = barrelMeshData.IndexCount;
+    barrelGeometry.vertexBufferOffset = barrelMeshData.VBOffset;
+    barrelGeometry.vertexBufferStride = barrelMeshData.VBStride;
+
+    ufoGeometry.indexBuffer = ufoMeshData.IndexBuffer;
+    ufoGeometry.vertexBuffer = ufoMeshData.VertexBuffer;
+    ufoGeometry.numberOfIndices = ufoMeshData.IndexCount;
+    ufoGeometry.vertexBufferOffset = ufoMeshData.VBOffset;
+    ufoGeometry.vertexBufferStride = ufoMeshData.VBStride;
+
     //Material shinyMaterial;
     shinyMaterial.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
     shinyMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -161,25 +191,9 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
     gameObject = new GameObject("Floor", floorGeometry, noSpecMaterial);
     gameObject->SetPosition(0.0f, 0.0f, 0.0f);
-    gameObject->SetScale(1.0f, 1.0f, 1.0f);
+    gameObject->SetScale(10.0f, 1.0f, 10.0f);
     gameObject->SetRotation(0.0f, 0.0f, 0.0f);
     gameObject->SetTextureRV(floorTextureData);
-
-    _gameObjects.push_back(gameObject);
-
-    gameObject = new GameObject("Cube", cubeGeometry, shinyMaterial);
-    gameObject->SetPosition(0.0f, 1.0f, 0.0f);
-    gameObject->SetScale(1.0f, 1.0f, 1.0f);
-    gameObject->SetRotation(0.0f, 0.0f, 0.0f);
-    gameObject->SetTextureRV(cubeTextureData);
-
-    _gameObjects.push_back(gameObject);
-
-    gameObject = new GameObject("Aeroplane", aeroplaneGeometry, shinyMaterial);
-    gameObject->SetPosition(2.0f, 2.0f, 0.0f);
-    gameObject->SetScale(0.2f, 0.2f, 0.2f);
-    gameObject->SetRotation(0.0f, 0.0f, 0.0f);
-    gameObject->SetTextureRV(aeroplaneTextureData);
 
     _gameObjects.push_back(gameObject);
 
@@ -494,40 +508,39 @@ void Application::Cleanup()
     if (_wireFrame) _wireFrame->Release();
 }
 
-void Application::CreateObject(int objectNum)
+void Application::CreateObject(int objectNum, bool isShiny)
 {
+    Material material;
+    if (isShiny)
+        material = shinyMaterial;
+    else
+        material = noSpecMaterial;
+
     switch (objectNum)
     {
-    case 0:
-        gameObject = new GameObject("Floor", floorGeometry, noSpecMaterial);
-        gameObject->SetPosition(_camera->GetPosition());
-        gameObject->SetScale(objectScaleNumber, objectScaleNumber, objectScaleNumber);
-        gameObject->SetRotation(0.0f, 0.0f, 0.0f);
-        gameObject->SetTextureRV(floorTextureData);
-
-        _gameObjects.push_back(gameObject);
-        break;
     case 1:
-        gameObject = new GameObject("Cube", cubeGeometry, shinyMaterial);
-        gameObject->SetPosition(_camera->GetPosition());
-        gameObject->SetScale(objectScaleNumber, objectScaleNumber, objectScaleNumber);
-        gameObject->SetRotation(0.0f, 0.0f, 0.0f);
-        gameObject->SetTextureRV(cubeTextureData);
-
-        _gameObjects.push_back(gameObject);
+        gameObject = new GameObject("Aeroplane", aeroplaneGeometry, material);
+        gameObject->SetTextureRV(aeroplaneTextureData);
         break;
     case 2:
-        gameObject = new GameObject("Aeroplane", aeroplaneGeometry, shinyMaterial);
-        gameObject->SetPosition(_camera->GetPosition());
-        gameObject->SetScale(objectScaleNumber, objectScaleNumber, objectScaleNumber);
-        gameObject->SetRotation(0.0f, 0.0f, 0.0f);
-        gameObject->SetTextureRV(aeroplaneTextureData);
-
-        _gameObjects.push_back(gameObject);
+        gameObject = new GameObject("Barrel", barrelGeometry, material);
+        gameObject->SetTextureRV(barrelTextureData);
+        break;
+    case 3:
+        gameObject = new GameObject("UFO", ufoGeometry, material);
+        gameObject->SetTextureRV(ufoTextureData);
         break;
     default:
+        gameObject = new GameObject("Cube", cubeGeometry, material);
+        gameObject->SetTextureRV(cubeTextureData);
         break;
     }
+
+    gameObject->SetPosition(_camera1->GetPosition());
+    gameObject->SetScale(objectScaleNumber, objectScaleNumber, objectScaleNumber);
+    gameObject->SetRotation(0.0f, 0.0f, 0.0f);
+
+    _gameObjects.push_back(gameObject);
 }
 
 void Application::Update()
@@ -539,25 +552,9 @@ void Application::Update()
 
     DWORD dwTimeCur = GetTickCount();
 
-    //if (dwTimeStart == 0)
-    //    dwTimeStart = dwTimeCur;
+    if (dwTimeStart == 0)
+        dwTimeStart = dwTimeCur;
     deltaTime += (dwTimeCur - dwTimeStart) / 1000.0f;
-
-    //if (_driverType == D3D_DRIVER_TYPE_REFERENCE)
-    //{
-    //    t += (float) XM_PI * 0.0125f;
-    //}
-    //else
-    //{
-    //    static DWORD dwTimeStart = 0;
-    //    DWORD dwTimeCur = GetTickCount();
-
-    //    if (dwTimeStart == 0)
-    //        dwTimeStart = dwTimeCur;
-
-    //    t = (dwTimeCur - dwTimeStart) / 1000.0f;
-    //}
-
     
     if (deltaTime < frameRate)
     {
@@ -572,10 +569,6 @@ void Application::Update()
 
         cameraDetectDelay++;
 
-        XMFLOAT3 cubeRotation = _gameObjects[1]->GetRotation();
-        cubeRotation.y += 0.01f;
-        _gameObjects[1]->SetRotation(cubeRotation);
-
         POINT cursorPosOld, cursorPosNew;
         cursorPosOld.x = _WindowWidth / 2;
         cursorPosOld.y = _WindowHeight / 2;
@@ -587,15 +580,24 @@ void Application::Update()
         }
 
         //Camera controls
-        if (GetAsyncKeyState(VK_UP))
-            selectedCameraNum = 0;
-        if (GetAsyncKeyState(VK_DOWN))
-            selectedCameraNum = 1;
+        if (GetAsyncKeyState(VK_TAB) && isTabDown)
+            isTabDown = true;
+        else
+            isTabDown = false;
 
-        if (selectedCameraNum == 0)
+        if (GetAsyncKeyState(VK_TAB) && !isTabDown)
         {
-            XMFLOAT3 cameraPos = _camera->GetPosition();
-            XMFLOAT3 atPos = _camera->GetLookAt();
+            selectedCameraNum++;
+            isTabDown = true;
+        }
+        if (selectedCameraNum > 3)
+            selectedCameraNum = 0;
+
+        if (selectedCameraNum == 0 || selectedCameraNum == 3)
+        {
+            XMFLOAT3 cameraPos = _camera1->GetPosition();
+            XMFLOAT3 atPos = _camera1->GetLookAt();
+
             if (GetAsyncKeyState(VK_ESCAPE))
             {
                 exit(0);
@@ -624,6 +626,8 @@ void Application::Update()
                 objectCreateNumber = 1;
             if (GetAsyncKeyState(VK_NUMPAD2))
                 objectCreateNumber = 2;
+            if (GetAsyncKeyState(VK_NUMPAD3))
+                objectCreateNumber = 3;
 
             if (GetAsyncKeyState(VK_ADD))
                 objectScaleNumber += 0.01f;
@@ -633,9 +637,42 @@ void Application::Update()
             if (objectScaleNumber < 0.01f)
                 objectScaleNumber = 0.02f;
 
-            if (GetAsyncKeyState(MK_LBUTTON))
+            if (GetAsyncKeyState(MK_LBUTTON) && isLMouseDown)
+                isLMouseDown = true;
+            else
+                isLMouseDown = false;
+
+            if (GetAsyncKeyState(MK_LBUTTON) && !GetAsyncKeyState(VK_LCONTROL) && !isLMouseDown)
             {
-                CreateObject(objectCreateNumber);
+                CreateObject(objectCreateNumber, true);
+                isLMouseDown = true;
+            }
+            else if (GetAsyncKeyState(MK_LBUTTON) && GetAsyncKeyState(VK_LCONTROL) && !isLMouseDown)
+            {
+                CreateObject(objectCreateNumber, false);
+                isLMouseDown = true;
+            }
+            if (GetAsyncKeyState(MK_RBUTTON) && _gameObjects.size() > 1)
+            {
+                _gameObjects.back()->SetPosition(cameraPos);
+            }
+
+            if (GetAsyncKeyState(0x5A) && isZDown)
+                isZDown = true;
+            else
+                isZDown = false;
+
+            if (GetAsyncKeyState(VK_LCONTROL) && GetAsyncKeyState(0x5A) && !isZDown && _gameObjects.size() > 1)
+            {
+                prevGameObject = _gameObjects.back();
+                _gameObjects.pop_back();
+                isZDown = true;
+            }
+
+            if (GetAsyncKeyState(VK_LCONTROL) && GetAsyncKeyState(0x59) && prevGameObject != nullptr)
+            {
+                _gameObjects.push_back(prevGameObject);
+                prevGameObject = nullptr;
             }
 
             POINT mouseDirection;
@@ -643,97 +680,150 @@ void Application::Update()
 
             GetCursorPos(&cursorPosNew);
             if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x == cursorPosNew.x) //Detect looking down
-                atPos.y -= 0.1f;
+                atPos.y -= 0.01f;
             if (cursorPosOld.x > cursorPosNew.x && cursorPosOld.y == cursorPosNew.y) //Right
-                atPos.x -= 0.1f;
+                atPos.x -= 0.01f;
             if (cursorPosOld.x < cursorPosNew.x && cursorPosOld.y == cursorPosNew.y) //Left
-                atPos.x += 0.1f;
+                atPos.x += 0.01f;
             if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x == cursorPosNew.x) //Up
-                atPos.y += 0.1f;
+                atPos.y += 0.01f;
             if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x < cursorPosNew.x) //Up left
             {
-                atPos.x += 0.07f;
-                atPos.y += 0.07f;
+                atPos.x += 0.007f;
+                atPos.y += 0.007f;
             }
             if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x > cursorPosNew.x) //Up right
             {
-                atPos.x -= 0.07f;
-                atPos.y += 0.07f;
+                atPos.x -= 0.007f;
+                atPos.y += 0.007f;
             }
             if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x < cursorPosNew.x) //Down left
             {
-                atPos.x += 0.07f;
-                atPos.y -= 0.07f;
+                atPos.x += 0.007f;
+                atPos.y -= 0.007f;
             }
             if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x > cursorPosNew.x) //Down right
             {
-                atPos.x -= 0.07f;
-                atPos.y -= 0.07f;
+                atPos.x -= 0.007f;
+                atPos.y -= 0.007f;
             }
 
-            //float distanceBetweenPosAndAt = sqrt(pow((atPos.x + cameraPos.x), 2) + pow((atPos.y + cameraPos.y), 2) + pow((atPos.z - cameraPos.z), 2));
-
-            //if (distanceBetweenPosAndAt > 30)
-            //{
-            //    atPos.z -= 0.1f;
-            //}
-            //if (distanceBetweenPosAndAt < 30)
-            //{
-            //    atPos.z += 0.1f;
-            //}
-
-            //if (GetAsyncKeyState(VK_NUMPAD8))
-            //    _cameraOrbitRadius = max(_cameraOrbitRadiusMin, _cameraOrbitRadius - (_cameraSpeed * 0.2f));
-            //if (GetAsyncKeyState(VK_NUMPAD2))
-            //    _cameraOrbitRadius = min(_cameraOrbitRadiusMax, _cameraOrbitRadius + (_cameraSpeed * 0.2f));
-            //if (GetAsyncKeyState(VK_NUMPAD6))
-            //    _cameraOrbitAngleXZ += _cameraSpeed;
-            //if (GetAsyncKeyState(VK_NUMPAD4))
-            //    _cameraOrbitAngleXZ -= _cameraSpeed;
-
-            //float angleAroundZ = XMConvertToRadians(_cameraOrbitAngleXZ);
-            //float x = _cameraOrbitRadius * cos(angleAroundZ);
-            //float z = _cameraOrbitRadius * sin(angleAroundZ);
-
-            //cameraPos.x = x;
-            //cameraPos.z = z;
-
-            _camera->SetPosition(cameraPos);
-            _camera->SetLookAt(atPos);
-            _camera->Update();
+            _camera1->SetPosition(cameraPos);
+            _camera4->SetPosition(cameraPos);
+            _camera1->SetLookAt(atPos);
+            _camera4->SetLookAt(atPos.x, atPos.y, -(atPos.z));
+            _camera1->Update();
+            _camera4->Update();
         }
 
         if (selectedCameraNum == 1)
         {
-            XMFLOAT3 cameraPos = _camera2->GetPosition();
-            _camera2->SetPosition(cameraPos);
             _camera2->Update();
         }
 
-        if (GetAsyncKeyState(VK_RETURN))
+        if (selectedCameraNum == 2)
         {
-            XMFLOAT3 position = _gameObjects[1]->GetPosition();
-            position.z += 0.02f;
-            _gameObjects[1]->SetPosition(position);
+            _camera3->Update();
         }
-        else if (GetAsyncKeyState(VK_BACK))
+
+        //Translate new object
+        if (GetAsyncKeyState(VK_UP) && !GetAsyncKeyState(VK_LSHIFT) && !GetAsyncKeyState(VK_LCONTROL) && _gameObjects.size() > 1)
         {
-            XMFLOAT3 position = _gameObjects[1]->GetPosition();
+            XMFLOAT3 position = _gameObjects.back()->GetPosition();
+            position.z += 0.02f;
+            _gameObjects.back()->SetPosition(position);
+        }
+        if (GetAsyncKeyState(VK_DOWN) && !GetAsyncKeyState(VK_LSHIFT) && !GetAsyncKeyState(VK_LCONTROL) && _gameObjects.size() > 1)
+        {
+            XMFLOAT3 position = _gameObjects.back()->GetPosition();
             position.z -= 0.02f;
-            _gameObjects[1]->SetPosition(position);
+            _gameObjects.back()->SetPosition(position);
+        }
+        if (GetAsyncKeyState(VK_LEFT) && !GetAsyncKeyState(VK_LSHIFT) && !GetAsyncKeyState(VK_LCONTROL) && _gameObjects.size() > 1)
+        {
+            XMFLOAT3 position = _gameObjects.back()->GetPosition();
+            position.x -= 0.02f;
+            _gameObjects.back()->SetPosition(position);
+        }
+        if (GetAsyncKeyState(VK_RIGHT) && !GetAsyncKeyState(VK_LSHIFT) && !GetAsyncKeyState(VK_LCONTROL) && _gameObjects.size() > 1)
+        {
+            XMFLOAT3 position = _gameObjects.back()->GetPosition();
+            position.x += 0.02f;
+            _gameObjects.back()->SetPosition(position);
+        }
+        if (GetAsyncKeyState(VK_UP) && !GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState(VK_LCONTROL) && _gameObjects.size() > 1)
+        {
+            XMFLOAT3 position = _gameObjects.back()->GetPosition();
+            position.y += 0.02f;
+            _gameObjects.back()->SetPosition(position);
+        }
+        if (GetAsyncKeyState(VK_DOWN) && !GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState(VK_LCONTROL) && _gameObjects.size() > 1)
+        {
+            XMFLOAT3 position = _gameObjects.back()->GetPosition();
+            position.y -= 0.02f;
+            _gameObjects.back()->SetPosition(position);
+        }
+
+        //Rotate new object
+        if (GetAsyncKeyState(VK_UP) && GetAsyncKeyState(VK_LSHIFT) && _gameObjects.size() > 1)
+        {
+            XMFLOAT3 rotation = _gameObjects.back()->GetRotation();
+            rotation.x += 0.02f;
+            _gameObjects.back()->SetRotation(rotation);
+        }
+        if (GetAsyncKeyState(VK_DOWN) && GetAsyncKeyState(VK_LSHIFT) && _gameObjects.size() > 1)
+        {
+            XMFLOAT3 rotation = _gameObjects.back()->GetRotation();
+            rotation.x -= 0.02f;
+            _gameObjects.back()->SetRotation(rotation);
+        }
+        if (GetAsyncKeyState(VK_LEFT) && GetAsyncKeyState(VK_LSHIFT) && _gameObjects.size() > 1)
+        {
+            XMFLOAT3 rotation = _gameObjects.back()->GetRotation();
+            rotation.z += 0.02f;
+            _gameObjects.back()->SetRotation(rotation);
+        }
+        if (GetAsyncKeyState(VK_RIGHT) && GetAsyncKeyState(VK_LSHIFT) && _gameObjects.size() > 1)
+        {
+            XMFLOAT3 rotation = _gameObjects.back()->GetRotation();
+            rotation.z -= 0.02f;
+            _gameObjects.back()->SetRotation(rotation);
+        }
+        if (GetAsyncKeyState(VK_LEFT) && GetAsyncKeyState(VK_LCONTROL) && _gameObjects.size() > 1)
+        {
+            XMFLOAT3 rotation = _gameObjects.back()->GetRotation();
+            rotation.y += 0.02f;
+            _gameObjects.back()->SetRotation(rotation);
+        }
+        if (GetAsyncKeyState(VK_RIGHT) && GetAsyncKeyState(VK_LCONTROL) && _gameObjects.size() > 1)
+        {
+            XMFLOAT3 rotation = _gameObjects.back()->GetRotation();
+            rotation.y -= 0.02f;
+            _gameObjects.back()->SetRotation(rotation);
         }
     }
 
-    deltaTime = deltaTime - frameRate;
+    if (GetAsyncKeyState(VK_MULTIPLY) && isAsteriskDown)
+        isAsteriskDown = true;
+    else
+        isAsteriskDown = false;
 
-    //XMStoreFloat4x4(&_world, XMMatrixRotationY(t));
-    //XMStoreFloat4x4(&_world, XMMatrixTranslation(0.0f, 0.0f, 0.0f));
-    //XMStoreFloat4x4(&_world2, XMMatrixTranslation(0.0f, 3.0f, 0.0f));
-    //XMStoreFloat4x4(&_world2, XMMatrixRotationZ(t) * XMMatrixTranslation(7.5f, 0.0f, 2.0f) * XMMatrixScaling(0.4f, 0.4f, 0.4f) * XMMatrixRotationZ(t * 1.3));
-    //XMStoreFloat4x4(&_world3, XMMatrixRotationZ(t) * XMMatrixTranslation(10.0f, 0.0f, 2.0f) * XMMatrixScaling(0.4f, 0.4f, 0.4f) * XMMatrixRotationZ(t));
-    //XMStoreFloat4x4(&_world4, XMMatrixRotationZ(t) * XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixTranslation(5.0f, 0.0f, 2.0f));
-    //XMStoreFloat4x4(&_world4, XMMatrixScaling(0.3f, 0.3f, 0.3f) * XMMatrixRotationZ(t) * XMMatrixTranslation(2.0f, 0.0f, 0.0f) * XMMatrixRotationZ(t) * XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationZ(t) * XMMatrixTranslation(3.25f, 0.0f, 0.0f) * XMMatrixRotationZ(t));
-    //XMStoreFloat4x4(&_world5, XMMatrixTranslation(0.0f, 0.0f, 4.0f));
+    if (GetAsyncKeyState(VK_MULTIPLY) && !isAsteriskDown)
+    {
+        showWireFrame = !showWireFrame;
+        isAsteriskDown = true;
+    }
+
+    if (showWireFrame)
+    {
+        _pImmediateContext->RSSetState(_wireFrame);
+    }
+    else
+    {
+        _pImmediateContext->RSSetState(NULL);
+    }
+
+    deltaTime = deltaTime - frameRate;
 }
 
 void Application::Draw()
@@ -741,12 +831,9 @@ void Application::Draw()
     //
     // Clear the back buffer
     //
-    //float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f}; // red,green,blue,alpha
     float ClearColor[4] = {1.0f, 1.0f, 1.0f, 1.0f}; // red,green,blue,alpha
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
     _pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-    //_pImmediateContext->IAGetInputLayout(_pVertexLayout);
 
     _pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
     _pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
@@ -754,22 +841,33 @@ void Application::Draw()
     _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
     _pImmediateContext->PSSetSamplers(0, 1, &_pSamplerLinear);
 
-	//XMMATRIX world = XMLoadFloat4x4(&_world);
-	XMMATRIX view = XMLoadFloat4x4(&_camera->GetView());
-	XMMATRIX projection = XMLoadFloat4x4(&_camera->GetProjection());
+	XMMATRIX view = XMLoadFloat4x4(&_camera1->GetView());
+	XMMATRIX projection = XMLoadFloat4x4(&_camera1->GetProjection());
     XMMATRIX view2 = XMLoadFloat4x4(&_camera2->GetView());
     XMMATRIX projection2 = XMLoadFloat4x4(&_camera2->GetProjection());
+    XMMATRIX view3 = XMLoadFloat4x4(&_camera3->GetView());
+    XMMATRIX projection3 = XMLoadFloat4x4(&_camera3->GetProjection());
+    XMMATRIX view4 = XMLoadFloat4x4(&_camera4->GetView());
+    XMMATRIX projection4 = XMLoadFloat4x4(&_camera4->GetProjection());
 
     //
     // Update variables
     //
     ConstantBuffer cb;
-	//cb.mWorld = XMMatrixTranspose(world);
-    //cb.mWorld = XMMatrixTranspose(gameobject->GetWorldMatrix())
     if (selectedCameraNum == 1)
     {
         cb.mView = XMMatrixTranspose(view2);
         cb.mProjection = XMMatrixTranspose(projection2);
+    }
+    else if (selectedCameraNum == 2)
+    {
+        cb.mView = XMMatrixTranspose(view3);
+        cb.mProjection = XMMatrixTranspose(projection3);
+    }
+    else if (selectedCameraNum == 3)
+    {
+        cb.mView = XMMatrixTranspose(view4);
+        cb.mProjection = XMMatrixTranspose(projection4);
     }
     else
     {
@@ -787,17 +885,7 @@ void Application::Draw()
     cb.SpecularLight = specularLight;
     cb.SpecularPower = specularPower;
     //cb.EyePosW = eyePosW;
-    cb.EyePosW = _camera->GetPosition();
-
-    if (GetAsyncKeyState(VK_LEFT))
-    {
-        _pImmediateContext->RSSetState(NULL);
-    }
-
-    else if (GetAsyncKeyState(VK_RIGHT))
-    {
-        _pImmediateContext->RSSetState(_wireFrame);
-    }
+    cb.EyePosW = _camera1->GetPosition();
 
     for (auto gameObject : _gameObjects)
     {
@@ -828,21 +916,6 @@ void Application::Draw()
     //Render opaque objects
     //Set the blend state for transparent objects
     //_pImmediateContext->OMSetBlendState(_transparency, blendFactor, 0xffffffff);
-
-    //world = XMLoadFloat4x4(&_world2);
-    //cb.mWorld = XMMatrixTranspose(world);
-    //_pImmediateContext->PSSetShaderResources(0, 1, &objTextureData2);
-    //_pImmediateContext->IASetVertexBuffers(0, 1, &objMeshData2.VertexBuffer, &objMeshData2.VBStride, &objMeshData2.VBOffset);
-    //_pImmediateContext->IASetIndexBuffer(objMeshData2.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-    //_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
-    //_pImmediateContext->DrawIndexed(objMeshData2.IndexCount, 0, 0);
-
-    //world = XMLoadFloat4x4(&_world2);
-    //cb.mWorld = XMMatrixTranspose(world);
-    //_pImmediateContext->IASetVertexBuffers(0, 1, &_pVertexBufferCube, &stride, &offset);
-    //_pImmediateContext->IASetIndexBuffer(_pIndexBufferCube, DXGI_FORMAT_R16_UINT, 0);
-    //_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
-    //_pImmediateContext->DrawIndexed(cubeIndexNum, 0, 0);
 
     //
     // Present our back buffer to our front buffer

@@ -1,15 +1,23 @@
 ﻿  Application.cpp
-C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(537,30): warning C4244: 'initializing': conversion from 'float' to 'DWORD', possible loss of data
-C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(568,44): warning C4458: declaration of 'gameObject' hides class member
-C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.h(94,14): message : see declaration of 'Application::gameObject'
-C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(758): warning C4238: nonstandard extension used: class rvalue used as lvalue
-C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(759): warning C4238: nonstandard extension used: class rvalue used as lvalue
-C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(760): warning C4238: nonstandard extension used: class rvalue used as lvalue
-C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(761): warning C4238: nonstandard extension used: class rvalue used as lvalue
-C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(802,40): warning C4458: declaration of 'gameObject' hides class member
-C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.h(94,14): message : see declaration of 'Application::gameObject'
-C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(758,50): warning C4238: nonstandard extension used: class rvalue used as lvalue
-C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(759,62): warning C4238: nonstandard extension used: class rvalue used as lvalue
-C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(760,55): warning C4238: nonstandard extension used: class rvalue used as lvalue
-C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(761,67): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(550,30): warning C4244: 'initializing': conversion from 'float' to 'DWORD', possible loss of data
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(565,44): warning C4458: declaration of 'gameObject' hides class member
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.h(99,14): message : see declaration of 'Application::gameObject'
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(844): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(845): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(846): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(847): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(848): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(849): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(850): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(851): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(890,40): warning C4458: declaration of 'gameObject' hides class member
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.h(99,14): message : see declaration of 'Application::gameObject'
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(844,51): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(845,63): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(846,55): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(847,67): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(848,55): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(849,67): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(850,55): warning C4238: nonstandard extension used: class rvalue used as lvalue
+C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Application.cpp(851,67): warning C4238: nonstandard extension used: class rvalue used as lvalue
   DX11 Framework.vcxproj -> C:\Users\Ben\Documents\GitHub\DirectX-Framework\DX11 Framework (Final)\Debug\DX11 Framework.exe

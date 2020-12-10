@@ -13,6 +13,9 @@ private:
 	XMFLOAT3 _at;
 	XMFLOAT3 _up;
 
+	XMFLOAT3 _position;
+	XMFLOAT3 _lookAt;
+
 	FLOAT _windowWidth;
 	FLOAT _windowHeight;
 	FLOAT _nearDepth;
@@ -39,7 +42,9 @@ public:
 	XMFLOAT3 GetUp() const { return _up; }
 
 	void SetPosition(XMFLOAT3 position) { _eye = position; }
+	void SetPosition(float x, float y, float z) { _position.x = x; _position.y = y; _position.z = z; }
 	void SetLookAt(XMFLOAT3 lookAt) { _at = lookAt; }
+	void SetLookAt(float x, float y, float z) { _lookAt.x = x; _lookAt.y = y; _lookAt.z = z; }
 	void SetUp(XMFLOAT3 up) { _up = up; }
 
 	void Reshape(FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth);

@@ -36,10 +36,7 @@ private:
 	ID3D11Buffer*			_pVertexBufferPlane;
 	ID3D11Buffer*			_pIndexBufferPlane;
 	ID3D11Buffer*           _pConstantBuffer;
-	//XMFLOAT4X4              _world, _world2, _world3, _world4, _world5;
 	XMFLOAT4X4              _world;
-	//XMFLOAT4X4              _view;
-	//XMFLOAT4X4              _projection;
 	ID3D11DepthStencilView* _depthStencilView;
 	ID3D11Texture2D*		_depthStencilBuffer;
 	ID3D11RasterizerState*  _wireFrame;
@@ -52,6 +49,8 @@ private:
 	Geometry				cubeGeometry;
 	Geometry				floorGeometry;
 	Geometry				aeroplaneGeometry;
+	Geometry				barrelGeometry;
+	Geometry				ufoGeometry;
 
 	Material				shinyMaterial;
 	Material				noSpecMaterial;
@@ -69,14 +68,20 @@ private:
 	MeshData				floorMeshData;
 	MeshData				cubeMeshData;
 	MeshData				aeroplaneMeshData;
+	MeshData				barrelMeshData;
+	MeshData				ufoMeshData;
 	ID3D11ShaderResourceView* floorTextureData = nullptr;
 	ID3D11ShaderResourceView* cubeTextureData = nullptr;
 	ID3D11ShaderResourceView* aeroplaneTextureData = nullptr;
+	ID3D11ShaderResourceView* barrelTextureData = nullptr;
+	ID3D11ShaderResourceView* ufoTextureData = nullptr;
 
 	int selectedCameraNum = 0;
 	int cameraDetectDelay = 0;
-	int objectCreateNumber = 1;
-	float objectScaleNumber = 1;
+	int objectCreateNumber = 0;
+	float objectScaleNumber = 1.0f;
+	bool isLMouseDown, isZDown, isTabDown, isAsteriskDown = false;
+	bool showWireFrame = false;
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
@@ -85,16 +90,19 @@ private:
 	HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 	HRESULT InitShadersAndInputLayout();
 
-	void CreateObject(int objectNum);
+	void CreateObject(int objectNum, bool isShiny);
 
 	UINT _WindowHeight;
 	UINT _WindowWidth;
 
 	vector<GameObject*> _gameObjects;
 	GameObject* gameObject;
+	GameObject* prevGameObject;
 
-	Camera* _camera;
+	Camera* _camera1;
 	Camera* _camera2;
+	Camera* _camera3;
+	Camera* _camera4;
 	float _cameraOrbitRadius = 7.0f;
 	float _cameraOrbitRadiusMin = 2.0f;
 	float _cameraOrbitRadiusMax = 50.0f;
