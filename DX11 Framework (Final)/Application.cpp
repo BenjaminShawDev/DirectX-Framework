@@ -45,10 +45,6 @@ Application::Application()
 	_pConstantBuffer = nullptr;
     _pTextureRV = nullptr;
     _pSamplerLinear = nullptr;
-    //_camera1 = nullptr;
-    //_camera2 = nullptr;
-    //_camera3 = nullptr;
-    //_camera4 = nullptr;
     _transparency = nullptr;
     gameObject = nullptr;
     prevGameObject = nullptr;
@@ -700,6 +696,17 @@ void Application::UserKeyboardInput(float deltaTime)
         _gameObjects.back()->SetPosition(position.x, position.y -= (0.02f * objectTransformRate), position.z);
     }
 
+    //Translate all of the objects forward in the z axis
+    if (GetAsyncKeyState(' '))
+    {
+        for (int i = 1; i < _gameObjects.size(); i++)
+        {
+            XMFLOAT3 loopPosition = _gameObjects[i]->GetPosition();
+            loopPosition.z += 0.02f * objectTransformRate;
+            _gameObjects[i]->SetPosition(loopPosition);
+        }
+    }
+
     //Rotate the most recently created object
     XMFLOAT3 rotation = _gameObjects.back()->GetRotation();
     if (GetAsyncKeyState(VK_UP) && GetAsyncKeyState(VK_LSHIFT) && _gameObjects.size() > 1)
@@ -875,6 +882,7 @@ void Application::Draw()
     _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
     _pImmediateContext->PSSetSamplers(0, 1, &_pSamplerLinear);
 
+    //Set up view and projection for the cameras
 	XMMATRIX view = XMLoadFloat4x4(&_cameras[0]->GetView());
 	XMMATRIX projection = XMLoadFloat4x4(&_cameras[0]->GetProjection());
     XMMATRIX view2 = XMLoadFloat4x4(&_cameras[1]->GetView());
@@ -909,7 +917,6 @@ void Application::Draw()
         cb.mProjection = XMMatrixTranspose(projection);
     }
 
-    //cb.gTime = timeFromUpdateFunction;
     cb.DiffuseMtrl = diffuseMaterial;
     cb.DiffuseLight = diffuseLight;
     cb.LightVecW = lightDirection;
@@ -935,8 +942,6 @@ void Application::Draw()
             ID3D11ShaderResourceView* textureRV = gameObject->GetTextureRV();
             _pImmediateContext->PSSetShaderResources(0, 1, &textureRV);
         }
-
-        //_pImmediateContext->PSSetSamplers(0, 1, &_pSamplerLinear);
 
         _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 
