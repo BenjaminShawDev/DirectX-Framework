@@ -538,40 +538,40 @@ void Application::CreateObject(int objectNum, bool isShiny)
         gameObject->SetTextureRV(cubeTextureData);
         break;
     }
-
-    gameObject->SetPosition(_cameras[0]->GetPosition());
+    XMFLOAT3 objectPosition = _cameras[0]->GetPosition();
+    gameObject->SetPosition(objectPosition.x, objectPosition.y, objectPosition.z += 4.0f);
     gameObject->SetScale(objectScaleNumber, objectScaleNumber, objectScaleNumber);
     gameObject->SetRotation(0.0f, 0.0f, 0.0f);
 
     _gameObjects.push_back(gameObject);
 }
 
-void Application::UserKeyboardInput(float deltaTime)
+void Application::UserKeyboardInput()
 {
     //Move cameras 0 and 3 (1 and 2 are static)
     XMFLOAT3 cameraPos = _cameras[0]->GetPosition();
     XMFLOAT3 atPos = _cameras[0]->GetLookAt();
     if (selectedCameraNum == 0)
     {
-        if (GetAsyncKeyState('W'))
+        if (GetAsyncKeyState('W') && !GetAsyncKeyState(VK_CONTROL))
         {
             cameraPos.z += 0.1f;
         }
-        if (GetAsyncKeyState('S'))
+        if (GetAsyncKeyState('S') && !GetAsyncKeyState(VK_CONTROL))
         {
             cameraPos.z -= 0.1f;
         }
-        if (GetAsyncKeyState('A'))
+        if (GetAsyncKeyState('A') && !GetAsyncKeyState(VK_CONTROL))
         {
             cameraPos.x -= 0.1f;
         }
-        if (GetAsyncKeyState('D'))
+        if (GetAsyncKeyState('D') && !GetAsyncKeyState(VK_CONTROL))
         {
             cameraPos.x += 0.1f;
         }
-        if (GetAsyncKeyState('Q'))
+        if (GetAsyncKeyState('Q') && !GetAsyncKeyState(VK_CONTROL))
             cameraPos.y += 0.1f;
-        if (GetAsyncKeyState('E') && cameraPos.y > 1.5f)
+        if (GetAsyncKeyState('E') && cameraPos.y > 2.0f && !GetAsyncKeyState(VK_CONTROL))
             cameraPos.y -= 0.1f;
     }
     else if (selectedCameraNum == 3)
@@ -630,7 +630,7 @@ void Application::UserKeyboardInput(float deltaTime)
     //Sends the most recently created object to camera 0
     if (GetAsyncKeyState(MK_RBUTTON) && _gameObjects.size() > 1)
     {
-        _gameObjects.back()->SetPosition(cameraPos);
+        _gameObjects.back()->SetPosition(cameraPos.x, cameraPos.y, cameraPos.z += 4.0f);
     }
 
     if (GetAsyncKeyState('Z') && isZDown)
@@ -743,14 +743,25 @@ void Application::UserKeyboardInput(float deltaTime)
         _gameObjects.back()->SetScale(objectScaleNumber, objectScaleNumber, objectScaleNumber);
 
     //Change which object is created
-    if (GetAsyncKeyState(VK_NUMPAD0))
+    if (GetAsyncKeyState('0'))
         objectCreateNumber = 0;
-    if (GetAsyncKeyState(VK_NUMPAD1))
+    if (GetAsyncKeyState('1'))
         objectCreateNumber = 1;
-    if (GetAsyncKeyState(VK_NUMPAD2))
+    if (GetAsyncKeyState('2'))
         objectCreateNumber = 2;
-    if (GetAsyncKeyState(VK_NUMPAD3))
+    if (GetAsyncKeyState('3'))
         objectCreateNumber = 3;
+
+    //Change the colour of the light
+    if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('W')) //Purple
+        specularLight.z += 0.01f;
+    if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('S')) //Yellow
+        specularLight.z -= 0.01f;
+    if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('A')) //Red
+        specularLight.x += 0.01f;
+    if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('D')) //Blue
+        specularLight.x -= 0.01f;
+
     
     //Toggle rendering everything as wireframes
     if (GetAsyncKeyState(VK_MULTIPLY) && isAsteriskDown)
@@ -763,6 +774,7 @@ void Application::UserKeyboardInput(float deltaTime)
         showWireFrame = !showWireFrame;
         isAsteriskDown = true;
     }
+
 
     //Exit the game
     if (GetAsyncKeyState(VK_ESCAPE))
@@ -859,7 +871,7 @@ void Application::Update()
             _pImmediateContext->RSSetState(NULL);
         }
 
-        UserKeyboardInput(deltaTime);
+        UserKeyboardInput();
     }
 
 

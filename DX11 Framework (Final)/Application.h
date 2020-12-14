@@ -83,8 +83,6 @@ private:
 	float objectTransformRate = 1.0f;
 	bool isLMouseDown, isZDown, isTabDown, isAsteriskDown = false;
 	bool showWireFrame = false;
-	bool doDraw;
-
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
@@ -94,7 +92,7 @@ private:
 	HRESULT InitShadersAndInputLayout();
 
 	void CreateObject(int objectNum, bool isShiny);
-	void UserKeyboardInput(float deltaTime);
+	void UserKeyboardInput();
 
 	UINT _WindowHeight;
 	UINT _WindowWidth;
