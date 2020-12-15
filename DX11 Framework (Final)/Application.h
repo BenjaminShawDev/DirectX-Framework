@@ -7,10 +7,11 @@
 #include <directxcolors.h>
 #include "resource.h"
 #include "DDSTextureLoader.h"
-//#include "Structures.h"
+#include "Structures.h"
 #include "OBJLoader.h"
 #include "Camera.h"
 #include "GameObject.h"
+#include "Lighting.h"
 #include <vector>
 
 using namespace DirectX;
@@ -29,12 +30,6 @@ private:
 	ID3D11VertexShader*     _pVertexShader;
 	ID3D11PixelShader*      _pPixelShader;
 	ID3D11InputLayout*      _pVertexLayout;
-	ID3D11Buffer*           _pVertexBufferCube;
-	ID3D11Buffer*           _pIndexBufferCube;
-	ID3D11Buffer*			_pVertexBufferPyramid;
-	ID3D11Buffer*			_pIndexBufferPyramid;
-	ID3D11Buffer*			_pVertexBufferPlane;
-	ID3D11Buffer*			_pIndexBufferPlane;
 	ID3D11Buffer*           _pConstantBuffer;
 	XMFLOAT4X4              _world;
 	ID3D11DepthStencilView* _depthStencilView;
@@ -55,7 +50,6 @@ private:
 	Material				shinyMaterial;
 	Material				noSpecMaterial;
 
-	XMFLOAT3				lightDirection;
 	XMFLOAT4				diffuseMaterial;
 	XMFLOAT4				diffuseLight;
 	XMFLOAT4				ambientMaterial;
@@ -64,12 +58,14 @@ private:
 	XMFLOAT4				specularLight;
 	float					specularPower;
 	XMFLOAT3				eyePosW;
+	XMFLOAT3				lightDirection;
 
 	MeshData				floorMeshData;
 	MeshData				cubeMeshData;
 	MeshData				aeroplaneMeshData;
 	MeshData				barrelMeshData;
 	MeshData				ufoMeshData;
+
 	ID3D11ShaderResourceView* floorTextureData = nullptr;
 	ID3D11ShaderResourceView* cubeTextureData = nullptr;
 	ID3D11ShaderResourceView* aeroplaneTextureData = nullptr;
@@ -81,8 +77,9 @@ private:
 	int objectCreateNumber = 0;
 	float objectScaleNumber = 1.0f;
 	float objectTransformRate = 1.0f;
-	bool isLMouseDown, isZDown, isTabDown, isAsteriskDown = false;
+	bool isLMouseDown, isZDown, isTabDown, isAsteriskDown, isMdown = false;
 	bool showWireFrame = false;
+	bool mouseMovement = true;
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
@@ -105,6 +102,9 @@ private:
 
 	vector<Camera*> _cameras;
 	Camera* _camera;
+
+	vector<Lighting*> _lighting;
+	Lighting* _light;
 
 	UINT _renderHeight = 1080;
 	UINT _renderWidth = 1920;

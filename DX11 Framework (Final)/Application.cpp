@@ -36,18 +36,14 @@ Application::Application()
 	_pVertexShader = nullptr;
 	_pPixelShader = nullptr;
 	_pVertexLayout = nullptr;
-	_pVertexBufferCube = nullptr;
-	_pIndexBufferCube = nullptr;
-    _pVertexBufferPyramid = nullptr;
-    _pIndexBufferPyramid = nullptr;
-    _pVertexBufferPlane = nullptr;
-    _pIndexBufferPlane = nullptr;
 	_pConstantBuffer = nullptr;
     _pTextureRV = nullptr;
     _pSamplerLinear = nullptr;
     _transparency = nullptr;
     gameObject = nullptr;
     prevGameObject = nullptr;
+    _camera = nullptr;
+    _light = nullptr;
 }
 
 Application::~Application()
@@ -81,22 +77,22 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
     //Light direction from surface (XYZ)
     lightDirection = XMFLOAT3(0.25f, 0.5f, -1.0f);
-    //Diffuse material properties (RGBA)
-    diffuseMaterial = XMFLOAT4(0.8f, 0.5f, 0.5f, 1.0f);
     //Diffuse light colour (RGBA)
     diffuseLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-
+    //diffuseLight = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
     //Ambient
-    ambientMaterial = XMFLOAT4(0.2f, 0.2f, 0.2f, 0.2f);
     ambientLight = XMFLOAT4(0.2f, 0.2f, 0.2f, 0.2f);
-
+    //ambientLight = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
     //Specular
-    specularMaterial = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
     specularLight = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-    specularPower = 10.0f;
+    //specularLight = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+    specularPower = 20.0f;
 
-    //Eye pos
-    eyePosW = XMFLOAT3(0.0f, 0.0f, -5.0f);
+    XMFLOAT3 lightPosition = XMFLOAT3(0.0f, 10.0f, 0.0f);
+
+    //Create a light
+    _light = new Lighting(diffuseLight, ambientLight, specularLight, specularPower, lightDirection, lightPosition);
+    _lighting.push_back(_light);
 
     //Variable to check which camera we are on
     selectedCameraNum = 0;
@@ -106,28 +102,28 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     XMFLOAT3 at = XMFLOAT3(0.0f, 0.0f, 1.0f);
     XMFLOAT3 up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
+    _camera = new Camera(eye, at, up, (float)_renderWidth, (float)_renderHeight, 0.1f, 200.0f, true);
+    _cameras.push_back(_camera);
+
+    eye = XMFLOAT3(30.0f, 1.0f, 0.0f);
+    at = XMFLOAT3(0.0f, 1.0f, 0.0f);
+    up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+
+    _camera = new Camera(eye, at, up, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, false);
+    _cameras.push_back(_camera);
+
+    eye = XMFLOAT3(0.0f, 30.0f, 1.0f);
+    at = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+
+    _camera = new Camera(eye, at, up, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, false);
+    _cameras.push_back(_camera);
+
+    eye = XMFLOAT3(0.0f, 2.0f, -1.0f);
+    at = XMFLOAT3(0.0f, 0.0f, -1.0f);
+    up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+
     _camera = new Camera(eye, at, up, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, true);
-    _cameras.push_back(_camera);
-
-    XMFLOAT3 eye2 = XMFLOAT3(30.0f, 1.0f, 0.0f);
-    XMFLOAT3 at2 = XMFLOAT3(0.0f, 1.0f, 0.0f);
-    XMFLOAT3 up2 = XMFLOAT3(0.0f, 1.0f, 0.0f);
-
-    _camera = new Camera(eye2, at2, up2, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, false);
-    _cameras.push_back(_camera);
-
-    XMFLOAT3 eye3 = XMFLOAT3(0.0f, 30.0f, 1.0f);
-    XMFLOAT3 at3 = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    XMFLOAT3 up3 = XMFLOAT3(0.0f, 1.0f, 0.0f);
-
-    _camera = new Camera(eye3, at3, up3, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, false);
-    _cameras.push_back(_camera);
-
-    XMFLOAT3 eye4 = XMFLOAT3(0.0f, 2.0f, -1.0f);
-    XMFLOAT3 at4 = XMFLOAT3(0.0f, 0.0f, -1.0f);
-    XMFLOAT3 up4 = XMFLOAT3(0.0f, 1.0f, 0.0f);
-
-    _camera = new Camera(eye4, at4, up4, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, true);
     _cameras.push_back(_camera);
 
     //Load the OBJ files
@@ -143,6 +139,8 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/HERCULES_COLOR.dds", nullptr, &aeroplaneTextureData);
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/Cylinder.dds", nullptr, &barrelTextureData);
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/UFO.dds", nullptr, &ufoTextureData);
+
+    HRESULT hr;
 
     //Floor Geometry;
     floorGeometry.indexBuffer = floorMeshData.IndexBuffer;
@@ -230,7 +228,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     blendDesc.AlphaToCoverageEnable = false;
     blendDesc.RenderTarget[0] = rtbd;
 
-    _pd3dDevice->CreateBlendState(&blendDesc, &_transparency);
+    //_pd3dDevice->CreateBlendState(&blendDesc, &_transparency);
 
 	return S_OK;
 }
@@ -493,12 +491,6 @@ void Application::Cleanup()
     if (_pImmediateContext) _pImmediateContext->ClearState();
 
     if (_pConstantBuffer) _pConstantBuffer->Release();
-    if (_pVertexBufferCube) _pVertexBufferCube->Release();
-    if (_pIndexBufferCube) _pIndexBufferCube->Release();
-    if (_pVertexBufferPyramid) _pVertexBufferPyramid->Release();
-    if (_pIndexBufferPyramid) _pIndexBufferPyramid->Release();
-    if (_pVertexBufferPlane) _pVertexBufferPlane->Release();
-    if (_pIndexBufferPlane) _pIndexBufferPlane->Release();
     if (_pVertexLayout) _pVertexLayout->Release();
     if (_pVertexShader) _pVertexShader->Release();
     if (_pPixelShader) _pPixelShader->Release();
@@ -509,6 +501,15 @@ void Application::Cleanup()
     if (_depthStencilView) _depthStencilView->Release();
     if (_depthStencilBuffer) _depthStencilBuffer->Release();
     if (_wireFrame) _wireFrame->Release();
+    if (_solidShape) _solidShape->Release();
+    if (_transparency) _transparency->Release();
+    if (_pTextureRV) _pTextureRV->Release();
+    if (_pSamplerLinear) _pSamplerLinear->Release();
+    if (floorTextureData) floorTextureData->Release();
+    if (cubeTextureData) cubeTextureData->Release();
+    if (aeroplaneTextureData) aeroplaneTextureData->Release();
+    if (barrelTextureData) barrelTextureData->Release();
+    if (ufoTextureData) ufoTextureData->Release();
 }
 
 void Application::CreateObject(int objectNum, bool isShiny)
@@ -595,6 +596,18 @@ void Application::UserKeyboardInput()
     }
     _cameras[0]->SetPosition(cameraPos);
     _cameras[3]->SetPosition(cameraPos);
+
+    //Toggle if the camera follows the mouse
+    if (GetAsyncKeyState('M') && isMdown)
+        isMdown = true;
+    else
+        isMdown = false;
+
+    if (GetAsyncKeyState('M') && !isMdown)
+    {
+        mouseMovement = !mouseMovement;
+        isMdown = true;
+    }
 
     //Switch between the differet cameras controls
     if (GetAsyncKeyState(VK_TAB) && isTabDown)
@@ -754,14 +767,33 @@ void Application::UserKeyboardInput()
 
     //Change the colour of the light
     if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('W')) //Purple
-        specularLight.z += 0.01f;
+    {
+        XMFLOAT4 specLight = _lighting[0]->GetSpecularLight();
+        XMFLOAT4 ambLight = _lighting[0]->GetAmbientLight();
+        _lighting[0]->SetSpecularLight(specLight.x, specLight.y, specLight.z += 0.01f, specLight.w);
+        _lighting[0]->SetAmbientLight(ambLight.x, ambLight.y, ambLight.z += 0.01f, ambLight.w);
+    }
     if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('S')) //Yellow
-        specularLight.z -= 0.01f;
+    {
+        XMFLOAT4 specLight = _lighting[0]->GetSpecularLight();
+        XMFLOAT4 ambLight = _lighting[0]->GetAmbientLight();
+        _lighting[0]->SetSpecularLight(specLight.x, specLight.y, specLight.z -= 0.01f, specLight.w);
+        _lighting[0]->SetAmbientLight(ambLight.x, ambLight.y, ambLight.z -= 0.01f, ambLight.w);
+    }
     if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('A')) //Red
-        specularLight.x += 0.01f;
+    {
+        XMFLOAT4 specLight = _lighting[0]->GetSpecularLight();
+        XMFLOAT4 ambLight = _lighting[0]->GetAmbientLight();
+        _lighting[0]->SetSpecularLight(specLight.x += 0.01f, specLight.y, specLight.z, specLight.w);
+        _lighting[0]->SetAmbientLight(ambLight.x += 0.01f, ambLight.y, ambLight.z += 0.01f, ambLight.w);
+    }
     if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('D')) //Blue
-        specularLight.x -= 0.01f;
-
+    {
+        XMFLOAT4 specLight = _lighting[0]->GetSpecularLight();
+        XMFLOAT4 ambLight = _lighting[0]->GetAmbientLight();
+        _lighting[0]->SetSpecularLight(specLight.x -= 0.01f, specLight.y, specLight.z, specLight.w);
+        _lighting[0]->SetAmbientLight(ambLight.x -= 0.01f, ambLight.y, ambLight.z, ambLight.w);
+    }
     
     //Toggle rendering everything as wireframes
     if (GetAsyncKeyState(VK_MULTIPLY) && isAsteriskDown)
@@ -774,7 +806,6 @@ void Application::UserKeyboardInput()
         showWireFrame = !showWireFrame;
         isAsteriskDown = true;
     }
-
 
     //Exit the game
     if (GetAsyncKeyState(VK_ESCAPE))
@@ -817,42 +848,46 @@ void Application::Update()
         cursorPosOld.y = _WindowHeight / 2;
         mouseMovementDetectDelay++;
 
-        if (mouseMovementDetectDelay == 3)
+        if (mouseMovement)
         {
-            SetCursorPos(cursorPosOld.x, cursorPosOld.y);
-            mouseMovementDetectDelay = 0;
-        }
+            if (mouseMovementDetectDelay == 3)
+            {
+                //SetCursorPos(cursorPosOld.x, cursorPosOld.y);
+                SetCursorPos(_WindowWidth / 2, _WindowHeight / 2);
+                mouseMovementDetectDelay = 0;
+            }
 
-        if (selectedCameraNum == 0)
-        {
-            GetCursorPos(&cursorPosNew);
-            if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x == cursorPosNew.x) //Detect looking down
-                atPos.y -= 0.01f;
-            if (cursorPosOld.x > cursorPosNew.x && cursorPosOld.y == cursorPosNew.y) //Left
-                atPos.x -= 0.01f;
-            if (cursorPosOld.x < cursorPosNew.x && cursorPosOld.y == cursorPosNew.y) //Right
-                atPos.x += 0.01f;
-            if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x == cursorPosNew.x) //Up
-                atPos.y += 0.01f;
-            if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x < cursorPosNew.x) //Up right
+            if (selectedCameraNum == 0)
             {
-                atPos.x += 0.007f;
-                atPos.y += 0.007f;
-            }
-            if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x > cursorPosNew.x) //Up left
-            {
-                atPos.x -= 0.007f;
-                atPos.y += 0.007f;
-            }
-            if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x < cursorPosNew.x) //Down right
-            {
-                atPos.x += 0.007f;
-                atPos.y -= 0.007f;
-            }
-            if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x > cursorPosNew.x) //Down left
-            {
-                atPos.x -= 0.007f;
-                atPos.y -= 0.007f;
+                GetCursorPos(&cursorPosNew);
+                if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x == cursorPosNew.x) //Detect looking down
+                    atPos.y -= 0.01f;
+                if (cursorPosOld.x > cursorPosNew.x && cursorPosOld.y == cursorPosNew.y) //Left
+                    atPos.x -= 0.01f;
+                if (cursorPosOld.x < cursorPosNew.x && cursorPosOld.y == cursorPosNew.y) //Right
+                    atPos.x += 0.01f;
+                if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x == cursorPosNew.x) //Up
+                    atPos.y += 0.01f;
+                if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x < cursorPosNew.x) //Up right
+                {
+                    atPos.x += 0.007f;
+                    atPos.y += 0.007f;
+                }
+                if (cursorPosOld.y > cursorPosNew.y && cursorPosOld.x > cursorPosNew.x) //Up left
+                {
+                    atPos.x -= 0.007f;
+                    atPos.y += 0.007f;
+                }
+                if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x < cursorPosNew.x) //Down right
+                {
+                    atPos.x += 0.007f;
+                    atPos.y -= 0.007f;
+                }
+                if (cursorPosOld.y < cursorPosNew.y && cursorPosOld.x > cursorPosNew.x) //Down left
+                {
+                    atPos.x -= 0.007f;
+                    atPos.y -= 0.007f;
+                }
             }
         }
         
@@ -872,6 +907,7 @@ void Application::Update()
         }
 
         UserKeyboardInput();
+        _lighting[0]->Update();
     }
 
 
@@ -888,66 +924,37 @@ void Application::Draw()
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
     _pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+    //
+    // Update variables
+    //
+    ConstantBuffer cb;
+
     _pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
     _pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
     _pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
     _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
     _pImmediateContext->PSSetSamplers(0, 1, &_pSamplerLinear);
 
-    //Set up view and projection for the cameras
-	XMMATRIX view = XMLoadFloat4x4(&_cameras[0]->GetView());
-	XMMATRIX projection = XMLoadFloat4x4(&_cameras[0]->GetProjection());
-    XMMATRIX view2 = XMLoadFloat4x4(&_cameras[1]->GetView());
-    XMMATRIX projection2 = XMLoadFloat4x4(&_cameras[1]->GetProjection());
-    XMMATRIX view3 = XMLoadFloat4x4(&_cameras[2]->GetView());
-    XMMATRIX projection3 = XMLoadFloat4x4(&_cameras[2]->GetProjection());
-    XMMATRIX view4 = XMLoadFloat4x4(&_cameras[3]->GetView());
-    XMMATRIX projection4 = XMLoadFloat4x4(&_cameras[3]->GetProjection());
-
-    //
-    // Update variables
-    //
-    ConstantBuffer cb;
-    if (selectedCameraNum == 1)
-    {
-        cb.mView = XMMatrixTranspose(view2);
-        cb.mProjection = XMMatrixTranspose(projection2);
-    }
-    else if (selectedCameraNum == 2)
-    {
-        cb.mView = XMMatrixTranspose(view3);
-        cb.mProjection = XMMatrixTranspose(projection3);
-    }
-    else if (selectedCameraNum == 3)
-    {
-        cb.mView = XMMatrixTranspose(view4);
-        cb.mProjection = XMMatrixTranspose(projection4);
-    }
-    else
-    {
-        cb.mView = XMMatrixTranspose(view);
-        cb.mProjection = XMMatrixTranspose(projection);
-    }
-
-    cb.DiffuseMtrl = diffuseMaterial;
-    cb.DiffuseLight = diffuseLight;
-    cb.LightVecW = lightDirection;
-    cb.AmbientMtrl = ambientMaterial;
-    cb.AmbientLight = ambientLight;
-    cb.SpecularMtrl = specularMaterial;
-    cb.SpecularLight = specularLight;
-    cb.SpecularPower = specularPower;
-    //cb.EyePosW = eyePosW;
-    cb.EyePosW = _cameras[0]->GetPosition();
+    cb.mView = XMMatrixTranspose(XMLoadFloat4x4(&_cameras[selectedCameraNum]->GetView()));
+    cb.mProjection = XMMatrixTranspose(XMLoadFloat4x4(&_cameras[selectedCameraNum]->GetProjection()));
+    cb.DiffuseLight = _lighting[0]->GetDiffuseLight();
+    cb.AmbientLight = _lighting[0]->GetAmbientLight();
+    cb.SpecularLight = _lighting[0]->GetSpecularLight();
+    cb.SpecularPower = _lighting[0]->GetSpecularPower();
+    cb.LightVecW = _lighting[0]->GetLightDirection();
+    cb.EyePosW = _cameras[selectedCameraNum]->GetPosition();
 
     for (auto gameObject : _gameObjects)
     {
         Material material = gameObject->GetMaterialData();
-        cb.AmbientMtrl = material.ambient;
-        cb.DiffuseMtrl = material.diffuse;
-        cb.SpecularMtrl = material.specular;
+
+        _pImmediateContext->IASetInputLayout(_pVertexLayout);
 
         cb.mWorld = XMMatrixTranspose(gameObject->GetWorldMatrix());
+
+        cb.DiffuseMtrl = material.diffuse;
+        cb.AmbientMtrl = material.ambient;
+        cb.SpecularMtrl = material.specular;
 
         if (gameObject->HasTexture())
         {
@@ -959,14 +966,6 @@ void Application::Draw()
 
         gameObject->Draw(_pImmediateContext);
     }
-
-    //"Fine-tune" the blending equation
-    //float blendFactor[] = { 0.75f, 0.75f, 0.75f, 1.0f };
-    //Set the default blend state (no blending) for opaque objects
-    //_pImmediateContext->OMSetBlendState(0, 0, 0xffffffff);
-    //Render opaque objects
-    //Set the blend state for transparent objects
-    //_pImmediateContext->OMSetBlendState(_transparency, blendFactor, 0xffffffff);
 
     //
     // Present our back buffer to our front buffer
