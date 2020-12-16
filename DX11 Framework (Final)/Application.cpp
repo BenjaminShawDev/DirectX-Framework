@@ -109,21 +109,21 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     at = XMFLOAT3(0.0f, 1.0f, 0.0f);
     up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
-    _camera = new Camera(eye, at, up, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, false);
+    _camera = new Camera(eye, at, up, (float)_renderWidth, (float)_renderHeight, 0.1f, 200.0f, false);
     _cameras.push_back(_camera);
 
     eye = XMFLOAT3(0.0f, 30.0f, 1.0f);
     at = XMFLOAT3(0.0f, 0.0f, 0.0f);
     up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
-    _camera = new Camera(eye, at, up, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, false);
+    _camera = new Camera(eye, at, up, (float)_renderWidth, (float)_renderHeight, 0.1f, 200.0f, false);
     _cameras.push_back(_camera);
 
     eye = XMFLOAT3(0.0f, 2.0f, -1.0f);
     at = XMFLOAT3(0.0f, 0.0f, -1.0f);
     up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
-    _camera = new Camera(eye, at, up, (float)_renderWidth, (float)_renderHeight, 0.01f, 200.0f, true);
+    _camera = new Camera(eye, at, up, (float)_renderWidth, (float)_renderHeight, 0.1f, 200.0f, true);
     _cameras.push_back(_camera);
 
     //Load the OBJ files
@@ -508,7 +508,7 @@ void Application::Cleanup()
     if (_depthStencilView) _depthStencilView->Release();
     if (_depthStencilBuffer) _depthStencilBuffer->Release();
     if (_wireFrame) _wireFrame->Release();
-    if (_solidShape) _solidShape->Release();
+    //if (_solidShape) _solidShape->Release();
     if (_transparency) _transparency->Release();
     if (_pTextureRV) _pTextureRV->Release();
     if (_pSamplerLinear) _pSamplerLinear->Release();
@@ -618,6 +618,7 @@ void Application::UserKeyboardInput()
     if (GetAsyncKeyState('M') && !isMdown)
     {
         mouseMovement = !mouseMovement;
+        ShowCursor(!mouseMovement);
         isMdown = true;
     }
 
@@ -908,7 +909,9 @@ void Application::Update()
         //Update the cameras that move
         _cameras[0]->SetLookAt(atPos);
         _cameras[0]->Update();
-        _cameras[3]->Update();
+        _cameras[3]->Update();   
+
+        _cameras[selectedCameraNum]->Reshape(_WindowWidth, _WindowHeight, 0.1f, 200.0f);
 
         //Toggle between rendering wireframe
         if (showWireFrame)
