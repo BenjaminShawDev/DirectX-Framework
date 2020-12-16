@@ -78,7 +78,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     //Light direction from surface (XYZ)
     lightDirection = XMFLOAT3(0.25f, 0.5f, -1.0f);
     //Diffuse light colour (RGBA)
-    diffuseLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    diffuseLight = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
     //diffuseLight = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
     //Ambient
     ambientLight = XMFLOAT4(0.2f, 0.2f, 0.2f, 0.2f);
@@ -86,7 +86,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     //Specular
     specularLight = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
     //specularLight = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-    specularPower = 20.0f;
+    specularPower = 10.0f;
 
     XMFLOAT3 lightPosition = XMFLOAT3(0.0f, 10.0f, 0.0f);
 
@@ -132,6 +132,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     aeroplaneMeshData = OBJLoader::Load("Assets/Hercules.obj", _pd3dDevice, false);
     barrelMeshData = OBJLoader::Load("Assets/Cylinder.obj", _pd3dDevice, false);
     ufoMeshData = OBJLoader::Load("Assets/UFO.obj", _pd3dDevice, false);
+    sphereMeshData = OBJLoader::Load("Assets/Sphere.obj", _pd3dDevice, false);
 
     //Load the object textures
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/Brick.dds", nullptr, &floorTextureData);
@@ -139,8 +140,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/HERCULES_COLOR.dds", nullptr, &aeroplaneTextureData);
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/Cylinder.dds", nullptr, &barrelTextureData);
     CreateDDSTextureFromFile(_pd3dDevice, L"Assets/UFO.dds", nullptr, &ufoTextureData);
-
-    HRESULT hr;
+    CreateDDSTextureFromFile(_pd3dDevice, L"Assets/Stone.dds", nullptr, &sphereTextureData);
 
     //Floor Geometry;
     floorGeometry.indexBuffer = floorMeshData.IndexBuffer;
@@ -177,15 +177,22 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     ufoGeometry.vertexBufferOffset = ufoMeshData.VBOffset;
     ufoGeometry.vertexBufferStride = ufoMeshData.VBStride;
 
+    //Sphere geometry
+    sphereGeometry.indexBuffer = sphereMeshData.IndexBuffer;
+    sphereGeometry.vertexBuffer = sphereMeshData.VertexBuffer;
+    sphereGeometry.numberOfIndices = sphereMeshData.IndexCount;
+    sphereGeometry.vertexBufferOffset = sphereMeshData.VBOffset;
+    sphereGeometry.vertexBufferStride = sphereMeshData.VBStride;
+
     //Shiny material;
-    shinyMaterial.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-    shinyMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    shinyMaterial.specular = XMFLOAT4(0.5f, 0.5f, 0.5, 1.0f);
-    shinyMaterial.specularPower = 10.0f;
+    shinyMaterial.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+    shinyMaterial.diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+    shinyMaterial.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+    shinyMaterial.specularPower = 5.0f;
 
     //No specular light material;
     noSpecMaterial.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-    noSpecMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    noSpecMaterial.diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
     noSpecMaterial.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
     noSpecMaterial.specularPower = 0.0f;
 
@@ -510,6 +517,7 @@ void Application::Cleanup()
     if (aeroplaneTextureData) aeroplaneTextureData->Release();
     if (barrelTextureData) barrelTextureData->Release();
     if (ufoTextureData) ufoTextureData->Release();
+    if (sphereTextureData) sphereTextureData->Release();
 }
 
 void Application::CreateObject(int objectNum, bool isShiny)
@@ -533,6 +541,10 @@ void Application::CreateObject(int objectNum, bool isShiny)
     case 3:
         gameObject = new GameObject("UFO", ufoGeometry, material);
         gameObject->SetTextureRV(ufoTextureData);
+        break;
+    case 4:
+        gameObject = new GameObject("Sphere", sphereGeometry, material);
+        gameObject->SetTextureRV(sphereTextureData);
         break;
     default:
         gameObject = new GameObject("Cube", cubeGeometry, material);
@@ -764,6 +776,8 @@ void Application::UserKeyboardInput()
         objectCreateNumber = 2;
     if (GetAsyncKeyState('3'))
         objectCreateNumber = 3;
+    if (GetAsyncKeyState('4'))
+        objectCreateNumber = 4;
 
     //Change the colour of the light
     if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('W')) //Purple

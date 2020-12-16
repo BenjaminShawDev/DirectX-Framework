@@ -30,7 +30,7 @@ cbuffer ConstantBuffer : register( b0 )
 //--------------------------------------------------------------------------------------
 struct VS_OUTPUT
 {
-    float4 Pos : SV_POSITION;
+    float4 PosH : SV_POSITION;
     float3 Norm : NORMAL;
     float3 PosW : POSITION;
     float2 Tex : TEXCOORD0;
@@ -55,10 +55,12 @@ VS_OUTPUT VS(float4 Pos : POSITION, float3 NormalL : NORMAL, float2 Tex : TEXCOO
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
 
-    output.Pos = mul(Pos, World);
-    output.PosW = normalize(EyePosW - output.Pos.xyz);
-    output.Pos = mul(output.Pos, View);
-    output.Pos = mul(output.Pos, Projection);
+    output.PosH = mul(Pos, World);
+    float4 PosW = mul(Pos, World);
+    output.PosW = PosW.xyz;
+    //output.PosW = normalize(EyePosW - output.Pos.xyz);
+    output.PosH = mul(output.PosH, View);
+    output.PosH= mul(output.PosH, Projection);
 
     float3 normalW = mul(float4(NormalL, 0.0f), World).xyz;
     output.Norm = normalize(normalW);
@@ -73,6 +75,7 @@ VS_OUTPUT VS(float4 Pos : POSITION, float3 NormalL : NORMAL, float2 Tex : TEXCOO
 //--------------------------------------------------------------------------------------
 float4 PS(VS_OUTPUT input) : SV_Target
 {
+    float3 toEye = normalize(EyePosW - input.PosW);
     //Ambient
     float3 ambient = AmbientMtrl * AmbientLight;
 
@@ -82,16 +85,22 @@ float4 PS(VS_OUTPUT input) : SV_Target
 
     //Specular
     float3 r = reflect(-LightVecW, input.Norm);
-    float specularAmount = pow(max(dot(r, input.PosW), 0.0f), SpecularPower);
+    float specularAmount = pow(max(dot(r, toEye), 0.0f), SpecularPower);
     float3 specular = specularAmount * (SpecularMtrl * SpecularLight).rgb;
 
-    float4 textureColour = txDiffuse.Sample(samLinear, input.Tex);
+    float3 textureColour = txDiffuse.Sample(samLinear, input.Tex);
 
     float4 outColour;
-    outColour.rgb = (ambient + diffuse + specular) * textureColour;
+    //outColour.rgb = ((ambient + diffuse) * textureColour) + specular;
+    outColour.rgb = ((textureColour + (diffuse + ambient)) + specular);
+    //outColour.rgb = ((ambient + diffuse)) + specular;
     outColour.a = DiffuseMtrl.a;
+    
+	//outColour.rgb = ambient;
+	//outColour.rgb = diffuse;
+	//outColour.rgb = specular;
 
-    clip(outColour.a - 0.25f);
+    //clip(outColour.a - 0.25f);
 
     return outColour;
 

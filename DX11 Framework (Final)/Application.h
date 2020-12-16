@@ -46,6 +46,7 @@ private:
 	Geometry				aeroplaneGeometry;
 	Geometry				barrelGeometry;
 	Geometry				ufoGeometry;
+	Geometry				sphereGeometry;
 
 	Material				shinyMaterial;
 	Material				noSpecMaterial;
@@ -65,12 +66,14 @@ private:
 	MeshData				aeroplaneMeshData;
 	MeshData				barrelMeshData;
 	MeshData				ufoMeshData;
+	MeshData				sphereMeshData;
 
 	ID3D11ShaderResourceView* floorTextureData = nullptr;
 	ID3D11ShaderResourceView* cubeTextureData = nullptr;
 	ID3D11ShaderResourceView* aeroplaneTextureData = nullptr;
 	ID3D11ShaderResourceView* barrelTextureData = nullptr;
 	ID3D11ShaderResourceView* ufoTextureData = nullptr;
+	ID3D11ShaderResourceView* sphereTextureData = nullptr;
 
 	int selectedCameraNum;
 	int mouseMovementDetectDelay = 0;
